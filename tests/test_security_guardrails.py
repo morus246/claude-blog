@@ -484,15 +484,22 @@ def test_notebooklm_credential_files_contain_chmod_hardening() -> None:
         if not path.exists():
             pytest.skip(f"{label} not present at expected path")
         source = _read(path)
-        # Require at least one chmod 600 or chmod 700 call site, OR an
-        # explicit hardening helper definition + call.
+        # Require either explicit chmod 600+700 calls OR at least one
+        # call site of `_harden_perms(` (parenthesis distinguishes call from
+        # mere definition; the helper is useless if defined-but-never-called).
         has_chmod_600 = "0o600" in source
         has_chmod_700 = "0o700" in source
-        has_helper = "_harden_perms" in source
-        if not (has_chmod_600 and has_chmod_700) and not has_helper:
+        # Count helper calls (paren after name). The `def _harden_perms(`
+        # line counts as a call by this regex, so require >= 2 occurrences:
+        # 1 for the def, at least 1 for an actual call.
+        helper_uses = source.count("_harden_perms(")
+        has_helper_call = helper_uses >= 2  # def + at least 1 call
+
+        if not (has_chmod_600 and has_chmod_700) and not has_helper_call:
             missing.append(
                 f"{label}: missing chmod 600/700 calls AND no _harden_perms "
-                "helper found. Add explicit chmod after every credential write."
+                "call site found (def alone does not satisfy the gate). "
+                "Add explicit chmod after every credential write."
             )
 
     assert not missing, (

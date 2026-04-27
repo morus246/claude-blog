@@ -48,7 +48,7 @@ claude-blog is a Claude Code skill ecosystem for creating, optimizing, and manag
 ```
 
 **Recommended: clone then verify before installing** (lets you inspect
-install.sh and pin a release tag — closes audit VULN-005):
+install.sh and pin a release tag, closing audit VULN-005):
 
 ```bash
 git clone https://github.com/AgriciDaniel/claude-blog.git

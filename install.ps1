@@ -123,7 +123,11 @@ function Main {
     $reqFile = Join-Path $ScriptDir "requirements.txt"
     if (Test-Path $reqFile) {
         $pipLog = Join-Path ([System.IO.Path]::GetTempPath()) "claude-blog-pip-$([System.Guid]::NewGuid().ToString('N').Substring(0,8)).log"
-        $pipCmd = (Get-Command python3 -ErrorAction SilentlyContinue) ?? (Get-Command python -ErrorAction SilentlyContinue)
+        # Resolve python: prefer python3, fall back to python. Avoid the `??`
+        # null-coalescing operator (PowerShell 7+ only) so this works on the
+        # default Windows PowerShell 5.1.
+        $pipCmd = Get-Command python3 -ErrorAction SilentlyContinue
+        if (-not $pipCmd) { $pipCmd = Get-Command python -ErrorAction SilentlyContinue }
         if ($pipCmd) {
             $proc = Start-Process -FilePath $pipCmd.Source -ArgumentList @("-m","pip","install","--quiet","-r",$reqFile) -RedirectStandardError $pipLog -NoNewWindow -Wait -PassThru
             if ($proc.ExitCode -eq 0) {

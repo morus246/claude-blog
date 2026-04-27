@@ -54,8 +54,11 @@ def _write_secret_atomic(path: str, content: str) -> None:
     Uses tempfile in same dir + os.replace for atomicity (no partial writes
     on crash). Sets restrictive file mode before writing payload.
     """
-    os.makedirs(os.path.dirname(path), mode=0o700, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=".tmp-")
+    # Bare-filename safety: os.path.dirname returns "" if path has no dir
+    # component. Pass that to mkstemp(dir="") and it errors with FileNotFoundError.
+    parent = os.path.dirname(path) or "."
+    os.makedirs(parent, mode=0o700, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=parent, prefix=".tmp-")
     try:
         os.fchmod(fd, 0o600)
         with os.fdopen(fd, "w") as f:
@@ -742,7 +745,17 @@ def main():
         services = None
         if args.scopes:
             services = [s.strip() for s in args.scopes.split(",") if s.strip()]
-        run_oauth_flow(args.creds, services=services)
+        try:
+            run_oauth_flow(args.creds, services=services)
+        except ValueError as e:
+            # _scopes_for raises ValueError for unknown service keys.
+            # Surface a clean error instead of a stack trace.
+            print(f"Error: {e}", file=sys.stderr)
+            print(
+                f"Valid scope keys: {', '.join(sorted(SCOPES.keys()))}",
+                file=sys.stderr,
+            )
+            sys.exit(2)
         return
 
     if args.exchange:

@@ -1,3 +1,16 @@
+[build-system]
+# Required so `pip install -e ".[dev]"` works in CI. Without this, setuptools
+# falls back to legacy and refuses with "Multiple top-level packages discovered
+# in a flat-layout" because the repo root has assets/, skills/, agents/, etc.
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# This repo is a Claude Code skill bundle, not a Python package. Declare an
+# empty distribution so the editable install gives us only the metadata
+# (extras groups, etc.) without trying to import skill directories.
+py-modules = []
+
 [project]
 name = "claude-blog"
 version = "1.7.0"
