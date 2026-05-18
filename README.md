@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/header.webp" alt="claude-blog cover: pixel-art logo reading CLAUDE BLOG with the tagline AI-Powered Blog Creation, alongside a listing of core /blog commands (write, rewrite, analyze, brief, strategy, calendar, outline, audit)" width="100%">
+  <img src="assets/header.jpeg" alt="claude-blog: AI Blog Writing and SEO Optimization Skill for Claude Code" width="100%">
 </p>
 
 # AI Blog Writing & SEO Optimization Skill for Claude Code (`claude-blog`)
