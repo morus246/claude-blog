@@ -352,28 +352,35 @@ Capsules map to the "AI Citation Readiness" scoring category (15 points) in
 
 #### 5f. Internal Linking Zones
 
-Mark internal linking opportunities throughout the article using placeholder
-notation. The user (or a follow-up pass) will resolve these to actual URLs.
+**Step 0 — Load SITEMAP.md**
+Before writing any section, read `SITEMAP.md` from the project root (loaded via
+`scripts/load_untrusted_root.py` with a CSPRNG nonce fence, same as BRAND.md/VOICE.md).
+Build a keyword-to-URL lookup from its `Tags` and `Description` columns. Skip this step
+silently if `SITEMAP.md` is absent.
+
+**Step 1 — Prefer real links over placeholders**
+When the article calls for a link to an existing topic:
+- Check SITEMAP.md first (match by tags, title keywords, or URL slug)
+- Match found → write a real markdown link: `[anchor text](https://fabiomorus.com/path)`
+- No match → write a placeholder: `[INTERNAL-LINK: anchor text → target description]`
+
+Never invent a URL not present in SITEMAP.md.
+
+**Step 2 — Resolve remaining placeholders after draft**
+After the full draft is written, scan for `[INTERNAL-LINK: ...]` markers. Re-check SITEMAP.md:
+- Match found → replace with real link
+- No match → replace with an HTML comment:
+  `<!-- INTERNAL-LINK-UNRESOLVED: anchor → description (no matching page yet) -->`
+  This keeps the intent visible to the author but invisible to readers.
 
 Zone placement:
-- **Introduction** - Link to related pillar content or topic hub
-- **Each H2 section** - Link to supporting articles, deeper dives, related tools
-- **FAQ section** - Link answers to detailed content that expands on the answer
-- **Conclusion** - Link to the next logical piece of content the reader should consume
+- **Introduction** — link to a related service page or pillar post
+- **Each H2 section** — link to supporting posts, deeper dives, service pages
+- **FAQ section** — link answers to detailed content
+- **Conclusion** — link to the next logical read
 
-Format:
-```markdown
-[INTERNAL-LINK: anchor text → target description]
-```
-
-Example:
-```markdown
-For a deeper dive into keyword clustering, see our
-[INTERNAL-LINK: complete guide to keyword clustering → pillar page on keyword research methodology].
-```
-
-Target 5-10 internal link zones per 2,000-word post. Use descriptive anchor text
-(never "click here" or "read more"). See `skills/blog/references/internal-linking.md` for
+Target 5-10 real internal links per 2,000-word post. Use descriptive anchor text (never
+"click here" or "read more"). See `skills/blog/references/internal-linking.md` for
 anchor text rules and linking strategy.
 
 #### 5g. Paragraph Rules
@@ -508,6 +515,29 @@ Steps:
 
 The orchestrator holds the loop counter; this sub-skill never loops itself.
 
+### Phase 6.6: Auto-Translation (EN)
+
+Runs automatically after all Phase 6.5 gates pass. Produces an EN version without
+requiring an explicit `/blog translate` command.
+
+**Skip conditions (check first — skip silently if any applies):**
+- `translatedFrom:` is set in the source frontmatter (already a translation)
+- `lang: "en"` in frontmatter, or body text is primarily English
+- User passed `--no-translate` flag
+
+**Steps:**
+1. Derive an EN keyword localization map from the post title and tags
+2. Spawn the `blog-translator` agent for `en` with the source content + keyword map
+   (follows `skills/blog-translate/references/translation-rules.md`)
+3. Save output to `translations/en/<en-slug>.md` with locale frontmatter:
+   `lang: "en"`, `translatedFrom: "pt-BR"`, `translatedDate: "YYYY-MM-DD"`
+4. Structural integrity check: same H2/H3 count as source, SVG charts present,
+   FAQ count matches, no PT-BR body text remaining
+5. Add translation result to the Phase 7 delivery summary
+
+The translation runs AFTER delivery contract gates pass. A blocked draft never
+triggers translation.
+
 ### Phase 7: Delivery
 
 Present the completed article ONLY after Phase 6.5 returns all gates passing. Include the screenshots from `<folder>/preview/*.png` in the summary so the user can see what they are getting before reading the prose.
@@ -550,8 +580,7 @@ Summary template:
 
 ### Next Steps
 - Review and customize for your brand voice
-- Resolve [INTERNAL-LINK] placeholders with actual URLs
-- Add internal links to your existing content
+- Add missing pages to `SITEMAP.md` for future auto-linking
 - Run `/blog analyze <file>` to verify quality score
 - Generate VideoObject schema: `/blog schema <file>` (includes video markup)
 - Generate audio narration: `/blog audio generate <file>` (optional)
