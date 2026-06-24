@@ -275,6 +275,129 @@ Você tem agora 5 ferramentas concretas nas suas mãos: nomeação sem julgament
 Se os ataques são frequentes, se você está evitando lugares ou se a qualidade de vida está comprometida, é hora de ir além das técnicas de autoajuda. [A terapia](https://fabiomorus.com/servicos/ansiedade) existe exatamente para isso.
 
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "pt-BR",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Quanto tempo dura um ataque de pânico?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Segundo o DSM-5, um ataque de pânico atinge o pico em até 10 minutos e raramente excede 60 minutos no total. Em 2016, pesquisa com 25 países confirmou que a maioria dos episódios resolve-se espontaneamente nesse intervalo. As técnicas de respiração e grounding podem reduzir a duração significativamente."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "A respiração 4-7-8 realmente funciona?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sim, com evidência científica. Em 2023, revisão sistemática de 72 ensaios clínicos encontrou eficácia em 75% dos estudos, chegando a 100% em populações de alta ansiedade (Hopper et al., PMC, 2023). O mecanismo é a ativação do nervo vago pela expiração prolongada, que sinaliza ao sistema nervoso parassimpático que a ameaça passou."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ataque de pânico pode causar infarto ou desmaio?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Não. Um ataque de pânico não causa dano cardíaco nem desmaio. O desmaio ocorre quando a pressão arterial cai, mas no pânico ela sobe. A sensação de que vai desmaiar é real, mas o colapso raramente acontece. Se tiver dúvida, procure avaliação médica para descartar causas cardíacas."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Qual é a diferença entre ataque de pânico e crise de ansiedade?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Um ataque de pânico é um episódio súbito e intenso com pico bem definido em até 10 minutos, geralmente sem gatilho claro. Uma crise de ansiedade tende a ser gradual, ligada a um estressor identificável, e pode durar horas. O transtorno de pânico é diagnosticado com base em ataques recorrentes e inesperados."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Como evitar que os ataques de pânico voltem?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O tratamento mais eficaz a longo prazo é a TCC (Terapia Cognitivo-Comportamental), com eficácia confirmada em meta-análise de 74 ensaios e 6.699 participantes (Parry et al., PMC, 2023). Além disso: reduzir cafeína, praticar exercício aeróbico, evitar situações por medo e praticar técnicas de respiração diariamente."
+      }
+    }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Como Parar um Ataque de Pânico: 5 Técnicas Comprovadas",
+  "description": "Cinco técnicas com evidência científica para interromper um ataque de pânico em minutos, sem equipamento ou medicamento.",
+  "inLanguage": "pt-BR",
+  "totalTime": "PT10M",
+  "author": {
+    "@type": "Person",
+    "name": "Fábio Morus",
+    "url": "https://fabiomorus.com"
+  },
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Reconheça Que É um Ataque de Pânico",
+      "text": "Diga mentalmente: 'Estou tendo um ataque de pânico. Não é um infarto. Vai passar.' O pico dura no máximo 10 minutos. Não tente lutar contra os sintomas — resistir aumenta a adrenalina e prolonga a crise."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Respiração 4-7-8",
+      "text": "Inspire pelo nariz por 4 segundos, segure por 7, expire pela boca por 8 segundos. Repita 4 vezes. A expiração mais longa que a inspiração ativa o nervo vago e o sistema parassimpático."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Reflexo de Mergulho com Água Fria",
+      "text": "Mergulhe o rosto em água fria por 20 a 30 segundos, ou respingue água gelada nas bochechas, testa e pescoço. Ativa o reflexo de mergulho dos mamíferos e reduz a frequência cardíaca em 10 a 25% em 20 a 30 segundos."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Grounding 5-4-3-2-1",
+      "text": "Identifique: 5 coisas que vê, 4 que pode tocar, 3 que ouve, 2 que cheira, 1 que prova. Nomeie cada item com precisão. Isso ocupa os recursos cognitivos que alimentavam o medo e traz a atenção ao presente."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 5,
+      "name": "Box Breathing — Respiração Quadrada",
+      "text": "Inspire por 4 segundos, segure por 4, expire por 4, segure sem ar por 4. Repita 4 a 6 ciclos. Boa opção para ambientes públicos ou quando a técnica 4-7-8 parece exigente demais."
+    }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Fábio Morus",
+  "jobTitle": "Terapeuta Clínico",
+  "description": "Terapeuta clínico especializado em Transtorno Neurológico Funcional, ansiedade e transtorno de pânico. Atua com TCC, EMDR e hipnoterapia clínica, com consultas presenciais em Jersey (Channel Islands) e online para Portugal e Brasil.",
+  "url": "https://fabiomorus.com",
+  "sameAs": ["https://fabiomorus.com"],
+  "knowsAbout": [
+    "Transtorno de Pânico",
+    "Ansiedade",
+    "Terapia Cognitivo-Comportamental",
+    "EMDR",
+    "Hipnoterapia Clínica",
+    "Transtorno Neurológico Funcional"
+  ],
+  "worksFor": {
+    "@type": "Organization",
+    "name": "fabiomorus.com",
+    "url": "https://fabiomorus.com"
+  }
+}
+</script>
+
 ---
 
 ## Fontes

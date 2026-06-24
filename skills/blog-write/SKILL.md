@@ -352,32 +352,32 @@ Capsules map to the "AI Citation Readiness" scoring category (15 points) in
 
 #### 5f. Internal Linking Zones
 
-**Step 0 — Load SITEMAP.md**
+**Step 0: Load SITEMAP.md**
 Before writing any section, read `SITEMAP.md` from the project root (loaded via
 `scripts/load_untrusted_root.py` with a CSPRNG nonce fence, same as BRAND.md/VOICE.md).
 Build a keyword-to-URL lookup from its `Tags` and `Description` columns. Skip this step
 silently if `SITEMAP.md` is absent.
 
-**Step 1 — Prefer real links over placeholders**
+**Step 1: Prefer real links over placeholders**
 When the article calls for a link to an existing topic:
 - Check SITEMAP.md first (match by tags, title keywords, or URL slug)
-- Match found → write a real markdown link: `[anchor text](https://fabiomorus.com/path)`
-- No match → write a placeholder: `[INTERNAL-LINK: anchor text → target description]`
+- Match found - write a real markdown link: `[anchor text](https://fabiomorus.com/path)`
+- No match - write a placeholder: `[INTERNAL-LINK: anchor text -> target description]`
 
 Never invent a URL not present in SITEMAP.md.
 
-**Step 2 — Resolve remaining placeholders after draft**
+**Step 2: Resolve remaining placeholders after draft**
 After the full draft is written, scan for `[INTERNAL-LINK: ...]` markers. Re-check SITEMAP.md:
-- Match found → replace with real link
-- No match → replace with an HTML comment:
-  `<!-- INTERNAL-LINK-UNRESOLVED: anchor → description (no matching page yet) -->`
+- Match found - replace with real link
+- No match - replace with an HTML comment:
+  `<!-- INTERNAL-LINK-UNRESOLVED: anchor -> description (no matching page yet) -->`
   This keeps the intent visible to the author but invisible to readers.
 
 Zone placement:
-- **Introduction** — link to a related service page or pillar post
-- **Each H2 section** — link to supporting posts, deeper dives, service pages
-- **FAQ section** — link answers to detailed content
-- **Conclusion** — link to the next logical read
+- **Introduction** - link to a related service page or pillar post
+- **Each H2 section** - link to supporting posts, deeper dives, service pages
+- **FAQ section** - link answers to detailed content
+- **Conclusion** - link to the next logical read
 
 Target 5-10 real internal links per 2,000-word post. Use descriptive anchor text (never
 "click here" or "read more"). See `skills/blog/references/internal-linking.md` for
@@ -520,7 +520,7 @@ The orchestrator holds the loop counter; this sub-skill never loops itself.
 Runs automatically after all Phase 6.5 gates pass. Produces an EN version without
 requiring an explicit `/blog translate` command.
 
-**Skip conditions (check first — skip silently if any applies):**
+**Skip conditions (skip silently if any applies):**
 - `translatedFrom:` is set in the source frontmatter (already a translation)
 - `lang: "en"` in frontmatter, or body text is primarily English
 - User passed `--no-translate` flag
@@ -548,7 +548,7 @@ Portuguese.
 - Phase 6.6 was skipped (no EN file produced)
 - User passed `--no-localize` flag
 
-**Steps (inline, follows `skills/blog-localize/SKILL.md` Phases 1–5):**
+**Steps (inline, follows `skills/blog-localize/SKILL.md` Phases 1-5):**
 1. Parse locale `en-US`; build a minimal custom-locale profile (en-US is not in
    `cultural-adaptation.md`): informal address, imperative CTAs, USD currency,
    NIMH/ADAA/NAMI as preferred statistics sources, US legal references (ADA, FTC, HIPAA)
@@ -562,10 +562,10 @@ Portuguese.
    - Replace or supplement any professional-help links with generic or US-appropriate
      resources (e.g., SAMHSA National Helpline mention where contextually appropriate)
    - Confirm CTAs are imperative and direct (US norm): "Reach out", "Book a session",
-     "Get help" — not softened or passive
+     "Get help" - not softened or passive
    - Fix any idioms that read as translated rather than native
-4. Save in place — overwrite `translations/en/<slug>.md`
-5. Produce cultural-fit score: naturalness [1–10] / market relevance [1–10] / tone [1–10]
+4. Save in place: overwrite `translations/en/<slug>.md`
+5. Produce cultural-fit score: naturalness [1-10] / market relevance [1-10] / tone [1-10]
 
 ### Phase 6.8: Auto Locale-Audit
 
@@ -575,14 +575,14 @@ Runs after Phase 6.7. Non-blocking: issues are reported but do not stop delivery
 - User passed `--no-locale-audit`
 - `translations/` directory contains only one language subdirectory
 
-**Steps (inline, follows `skills/blog-locale-audit/SKILL.md` Phases 1–7):**
+**Steps (inline, follows `skills/blog-locale-audit/SKILL.md` Phases 1-7):**
 1. Discover all language subdirectories under `translations/`
 2. Check completeness matrix: does the current post's slug exist in every language found?
 3. Content parity on the current post: H2/H3 count, FAQ items, SVG charts, word-count
-   ratio (target: 85–115% of source)
+   ratio (target: 85-115% of source)
 4. SEO parity: `title`, `description`, `canonical` present in each translation's frontmatter
-5. Emit a prioritised report (critical / recommended) — never block delivery
-6. Add 3–5 line audit summary to the Phase 7 delivery summary
+5. Emit a prioritised report (critical / recommended); never block delivery
+6. Add 3-5 line audit summary to the Phase 7 delivery summary
 
 ### Phase 7: Delivery
 
