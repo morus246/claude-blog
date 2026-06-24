@@ -447,7 +447,7 @@ class TestENDetection:
         )
         (draft / "hero.jpg").write_bytes(b"\xff\xd8\xff\xe0" + b"x" * 100)
 
-        # Two EN files — one matches the PT slug (meu-post), one doesn't
+        # Two EN files - one matches the PT slug (meu-post), one doesn't
         en_dir = tmp_path / "translations" / "en"
         en_dir.mkdir(parents=True)
         (en_dir / "meu-post.md").write_text(

@@ -247,7 +247,7 @@ def _try_mmx(topic: str, tags: list[str], out_dir: Path) -> Optional[dict]:
         print("[mmx] not found in PATH; skipping", file=sys.stderr)
         return None
 
-    # Quota pre-check — fail-open: if parsing fails, proceed
+    # Quota pre-check - fail-open: if parsing fails, proceed
     try:
         quota_res = subprocess.run(
             ["mmx", "quota", "show", "--output", "json", "--quiet"],
