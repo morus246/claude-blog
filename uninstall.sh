@@ -40,7 +40,7 @@ main() {
     # (v1.8.6: install.sh now copies all scripts/*.py to that location).
     local helper_scripts=(
         "analyze_blog.py" "blog_hygiene.py" "blog_preflight.py" "blog_render.py"
-        "cognitive_load.py" "discourse_research.py" "generate_hero.py"
+        "cognitive_load.py" "deploy_post.py" "discourse_research.py" "generate_hero.py"
         "load_untrusted_root.py" "lint_prose.py" "sync_flow.py"
     )
     for s in "${helper_scripts[@]}"; do
