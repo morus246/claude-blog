@@ -14,19 +14,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
-import re
 import shutil
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 from typing import Optional
 
 
-BLOG_CATEGORIES = frozenset({
-    "ansiedade", "fobias", "sono-bem-estar", "tecnicas", "hipnoterapia", "historias"
-})
 _REMOVE_PT = frozenset({"ogImage", "canonical"})
 _REMOVE_EN = frozenset({"ogImage", "canonical", "locale", "translatedFrom", "translatedDate", "slug"})
 
