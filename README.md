@@ -36,7 +36,7 @@
 
 ## Key takeaways
 
-- **What it is**: a full-lifecycle blog engine: 30 sub-skills, 5 agents, 12 content templates, 21 on-demand references, 9 root-level Python scripts, 189 passing tests.
+- **What it is**: a full-lifecycle blog engine: 30 sub-skills, 5 agents, 12 content templates, 21 on-demand references, 9 root-level Python scripts, 258 passing tests.
 - **Who it is for**: solo bloggers, marketing teams, agencies, and Claude Code skill builders who want production-grade content output, not one-shot drafts.
 - **Core promise**: every draft passes a 5-gate delivery contract (Capability, Format, Visual, Content Review, Asset Integrity) or the writer iterates up to 3 times before escalating to you.
 - **What makes it different**: it eats its own dogfood. Version-coherence is CI-enforced across 14 surfaces, prose-hygiene runs on every PR, three mutation-tested regression suites lock the v1.9.0 fixes, and `blog-reviewer` is a BLOCKING gate, not advisory.
@@ -50,7 +50,7 @@ claude-blog serves three audiences with one engine:
 
 **Marketing teams and agencies** managing many posts across topics, languages, and platforms. The skill ships topic-cluster planning (`/blog cluster`), multilingual one-command publishing (`/blog multilingual`), cannibalization detection (`/blog cannibalization`), and persona-driven voice profiles (`/blog persona`) so the same engine produces consistent content across the team.
 
-**Claude Code skill builders** who want a production-grade reference for skill architecture, agent dispatch, delivery contracts, and CI gating. The repo demonstrates the Agent Skills open standard at Tier 4 complexity with 189 tests, version-coherence enforcement, installer-sync regression tests, and the v1.9.0 5-gate contract pattern. Read the source for inspiration; fork the patterns into your own skills.
+**Claude Code skill builders** who want a production-grade reference for skill architecture, agent dispatch, delivery contracts, and CI gating. The repo demonstrates the Agent Skills open standard at Tier 4 complexity with 258 tests, version-coherence enforcement, installer-sync regression tests, and the v1.9.0 5-gate contract pattern. Read the source for inspiration; fork the patterns into your own skills.
 
 ## What does claude-blog produce?
 
@@ -344,7 +344,7 @@ claude-blog ships as one orchestrator plus 29 sub-skills, 5 agents, 21 reference
 | On-demand references | 21 | `skills/blog/references/*.md` |
 | Content templates | 12 | `skills/blog/templates/*.md` |
 | Root-level Python scripts | 9 | `scripts/*.py` |
-| Tests | 189 | `tests/test_*.py` |
+| Tests | 258 | `tests/test_*.py` |
 
 Full directory tree, data flow diagrams, scoring methodology, and extension points: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
@@ -356,7 +356,7 @@ Full directory tree, data flow diagrams, scoring methodology, and extension poin
 
 ### Quality gates (CI-enforced on every PR)
 
-1. **pytest**: 189 tests across security, behavioral, regression, and delivery-contract suites.
+1. **pytest**: 258 tests across security, behavioral, regression, and delivery-contract suites.
 2. **Plugin validation**: `claude plugin validate .` plus hand-rolled JSON/regex checks.
 3. **Stale-path lint**: catches drift in `references/` and `templates/` cross-references.
 4. **Prose hygiene**: `scripts/lint_prose.py` (fence-aware, backtick-aware) enforces the CONTRIBUTING.md no-em-dash, no-en-dash, no-` -- ` rule.
@@ -486,7 +486,7 @@ GitHub also surfaces the structured [`CITATION.cff`](CITATION.cff) file via "Cit
 
 Contributions welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines. Before opening a PR:
 
-1. Run `python -m pytest tests/` (all 189 must pass).
+1. Run `python -m pytest tests/` (all 258 must pass).
 2. Run `python3 scripts/lint_prose.py --root .` (zero violations).
 3. Run `claude plugin validate .` (must pass).
 4. Bump versions coherently if you touch user-visible counts or behavior (see [`docs/PUBLISHING.md`](docs/PUBLISHING.md)).
