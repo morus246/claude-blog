@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_No unreleased changes._
+### Tests: deploy frontmatter kwargs aligned + prose lint pass
+
+Fixed a one-token test signature drift in `tests/test_deploy_post.py` that broke 20 pre-existing tests across `TestNormalizePTFrontmatter` and `TestNormalizeENFrontmatter`. Replaced 5 em-dashes flagged by `scripts/lint_prose.py` per the `CONTRIBUTING.md` rule. No production code changed.
+
+**Fixed**
+
+- `tests/test_deploy_post.py`: kwargs `hero_rel` -> `hero_url` in the two `_run` helpers (lines 82, 152) so the call signature matches `scripts/deploy_post.py` `_normalize_pt_frontmatter` and `_normalize_en_frontmatter`. Function signatures were already correct; only the tests had drifted.
+- `scripts/deploy_post.py`, `scripts/generate_hero.py`, `tests/test_deploy_post.py`: replaced 5 U+2014 (em-dash) characters with ` - ` (ASCII hyphen with spaces) per the prose-hygiene lint.
 
 ## [1.9.1] - 2026-05-18
 
