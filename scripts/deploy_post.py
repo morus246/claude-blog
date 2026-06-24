@@ -107,12 +107,14 @@ def _normalize_pt_frontmatter(
         if key in _REMOVE_PT:
             continue
         if key == "coverImage":
-            out.append(f'image: "{hero_rel}"')
-            seen.add("image")
+            if "image" not in seen:
+                out.append(f'image: "{hero_rel}"')
+                seen.add("image")
             continue
         if key == "image":
-            out.append(f'image: "{hero_rel}"')
-            seen.add("image")
+            if "image" not in seen:
+                out.append(f'image: "{hero_rel}"')
+                seen.add("image")
             continue
         if key == "coverImageAlt":
             val = line.partition(": ")[2]
@@ -165,12 +167,14 @@ def _normalize_en_frontmatter(
         if key in _REMOVE_EN:
             continue
         if key == "coverImage":
-            out.append(f'image: "{hero_rel}"')
-            seen.add("image")
+            if "image" not in seen:
+                out.append(f'image: "{hero_rel}"')
+                seen.add("image")
             continue
         if key == "image":
-            out.append(f'image: "{hero_rel}"')
-            seen.add("image")
+            if "image" not in seen:
+                out.append(f'image: "{hero_rel}"')
+                seen.add("image")
             continue
         if key == "coverImageAlt":
             val = line.partition(": ")[2]
@@ -256,8 +260,19 @@ def main() -> int:
     fm_raw, body = _parse_frontmatter_full(content)
 
     en_dir = root / "translations" / "en"
-    en_files = list(en_dir.glob("*.md")) if en_dir.is_dir() else []
-    en_md = en_files[0] if en_files else None
+    en_md: Optional[Path] = None
+    if en_dir.is_dir():
+        en_files = list(en_dir.glob("*.md"))
+        slug_match = [f for f in en_files if f.stem == slug]
+        if slug_match:
+            en_md = slug_match[0]
+        elif len(en_files) == 1:
+            en_md = en_files[0]
+        elif len(en_files) > 1:
+            print(
+                f"[deploy] WARNING: {len(en_files)} files in translations/en/ and none matches slug '{slug}' — skipping EN deploy.",
+                file=sys.stderr,
+            )
     en_slug = en_md.stem if en_md else None
 
     fm_pt = _normalize_pt_frontmatter(fm_raw, slug, en_slug, args.category, hero_rel)

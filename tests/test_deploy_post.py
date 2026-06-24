@@ -133,6 +133,14 @@ class TestNormalizePTFrontmatter:
         result = self._run(deploy_module, "title: T\n")
         assert "translationKey:" not in result
 
+    def test_no_duplicate_image_when_both_coverImage_and_image_present(self, deploy_module):
+        """When both coverImage and image are in frontmatter, only one image: line is emitted."""
+        fm = "title: T\ncoverImage: https://old.jpg\nimage: https://older.jpg\n"
+        result = self._run(deploy_module, fm)
+        image_lines = [l for l in result.splitlines() if l.startswith("image:")]
+        assert len(image_lines) == 1, f"Expected 1 image: line, got {len(image_lines)}: {image_lines}"
+        assert self.HERO in image_lines[0]
+
 
 # ---- _normalize_en_frontmatter ----
 
@@ -427,3 +435,50 @@ class TestDryRun:
         data = json.loads(out.getvalue())
         assert "en_url" in data
         assert "my-post" in data["en_url"]
+
+
+class TestENDetection:
+    def test_en_translation_by_slug_match_preferred(self, deploy_module, tmp_path, fake_site, monkeypatch):
+        """When translations/en/ has multiple files, the one matching the PT slug is used."""
+        draft = tmp_path / "content" / "meu-post"
+        draft.mkdir(parents=True)
+        (draft / "meu-post.md").write_text(
+            "---\ntitle: T\ncoverImage: https://x.jpg\n---\nBody.\n", encoding="utf-8"
+        )
+        (draft / "hero.jpg").write_bytes(b"\xff\xd8\xff\xe0" + b"x" * 100)
+
+        # Two EN files — one matches the PT slug (meu-post), one doesn't
+        en_dir = tmp_path / "translations" / "en"
+        en_dir.mkdir(parents=True)
+        (en_dir / "meu-post.md").write_text(
+            "---\ntitle: My Post\ncoverImage: https://x.jpg\n---\nEN body.\n", encoding="utf-8"
+        )
+        (en_dir / "other-post.md").write_text(
+            "---\ntitle: Other Post\ncoverImage: https://x.jpg\n---\nOther EN body.\n", encoding="utf-8"
+        )
+
+        class _R:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        monkeypatch.setattr(subprocess, "run", lambda cmd, **kw: _R())
+        monkeypatch.setattr(deploy_module, "_load_config", lambda root: {"site": str(fake_site)})
+        monkeypatch.setattr(deploy_module, "_get_repo_root", lambda: tmp_path)
+
+        import io
+        out = io.StringIO()
+        monkeypatch.setattr(sys, "stdout", out)
+
+        sys.argv = ["deploy_post.py", "--draft", str(draft), "--dry-run"]
+        rc = deploy_module.main()
+        assert rc == 0
+
+        # The slug-matched file (meu-post) must be deployed, not the other one
+        en_dest = fake_site / "src" / "content" / "blog-en" / "meu-post.md"
+        wrong_dest = fake_site / "src" / "content" / "blog-en" / "other-post.md"
+        assert en_dest.exists(), "Slug-matched EN file must be deployed"
+        assert not wrong_dest.exists(), "Non-matching EN file must NOT be deployed"
+
+        data = json.loads(out.getvalue())
+        assert "meu-post" in data.get("en_url", "")

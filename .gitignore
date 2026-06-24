@@ -29,6 +29,7 @@ yarn-error.log*
 *.key
 *.pem
 credentials.json
+.deploy.json
 
 # MCP server configs (may carry inline credentials)
 # A tracked .mcp.example.json template lives alongside, with env-expansion only.

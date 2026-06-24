@@ -597,7 +597,7 @@ Runs automatically after Phase 6.8 completes. The hero must exist in `<draft-fol
    ```
    DYLD_LIBRARY_PATH=/opt/homebrew/lib <python> scripts/deploy_post.py --draft <folder> --category <category>
    ```
-   Infer `<category>` from the post's primary tag using the BLOG_CATEGORIES enum:
+   Infer `<category>` from the post's primary tag using this category list:
    `ansiedade`, `fobias`, `sono-bem-estar`, `tecnicas`, `hipnoterapia`, `historias`.
    If no tag maps cleanly, omit `--category` (field is optional in the Astro schema).
 
