@@ -232,6 +232,7 @@ date: "YYYY-MM-DD"
 lastUpdated: "YYYY-MM-DD"
 author: "[Author name]"
 tags: ["keyword1", "keyword2", "keyword3"]
+category: "[ansiedade|fobias|sono-bem-estar|tecnicas|hipnoterapia|historias]"
 ---
 ```
 
@@ -505,7 +506,7 @@ Resolve `<python>` once before the steps below: prefer `.venv/bin/python` when i
 
 Steps:
 
-1. **Capability discovery + hero**: run `<python> scripts/blog_preflight.py --draft <folder> --gate 1` to enumerate available paths. If `nanobanana-mcp` is loaded, generate the hero via the MCP tool. Otherwise run `<python> scripts/generate_hero.py --topic "<title>" --tags "<tags>" --out <folder>` (uses the Gemini, Unsplash, Pexels, Pixabay, Openverse ladder).
+1. **Capability discovery + hero**: run `<python> scripts/blog_preflight.py --draft <folder> --gate 1` to enumerate available paths. If `nanobanana-mcp` is loaded, generate the hero via the MCP tool. Otherwise run `<python> scripts/generate_hero.py --topic "<title>" --tags "<tags>" --out <folder>` (uses the mmx, Unsplash, Openverse ladder).
 
 2. **Format completeness**: render the canonical `.md` to `.html` and `.pdf` via `<python> scripts/blog_render.py --md <slug>.md --out-dir <folder> --json`. Capture the returned `html` path; the renderer derives it from frontmatter and it may differ from the Markdown filename. All three artifacts plus `hero.<ext>` must end up in the draft folder.
 
@@ -588,6 +589,22 @@ Runs after Phase 6.7. Non-blocking: issues are reported but do not stop delivery
 5. Emit a prioritised report (critical / recommended); never block delivery
 6. Add 3-5 line audit summary to the Phase 7 delivery summary
 
+### Phase 8: Deploy to fabiomorus.com
+
+Runs automatically after Phase 6.8 completes. The hero must exist in `<draft-folder>/hero.<ext>` (produced by Phase 6.5 Gate 1).
+
+1. Run:
+   ```
+   DYLD_LIBRARY_PATH=/opt/homebrew/lib <python> scripts/deploy_post.py --draft <folder> --category <category>
+   ```
+   Infer `<category>` from the post's primary tag using the BLOG_CATEGORIES enum:
+   `ansiedade`, `fobias`, `sono-bem-estar`, `tecnicas`, `hipnoterapia`, `historias`.
+   If no tag maps cleanly, omit `--category` (field is optional in the Astro schema).
+
+2. On `"status": "ok"`: add the returned `pt_url` and `en_url` (if present) to the Phase 7 delivery summary.
+
+3. On failure: surface the error JSON to the user. Do NOT retry. Do NOT call `deploy.sh` manually.
+
 ### Phase 7: Delivery
 
 Present the completed article ONLY after Phase 6.5 returns all gates passing. Include the screenshots from `<folder>/preview/*.png` in the summary so the user can see what they are getting before reading the prose.
@@ -639,6 +656,8 @@ Summary template:
 - Issues: [N critical | N recommended]
 
 ### Next Steps
+- Published PT: https://fabiomorus.com/blog/<slug> *(populated by Phase 8 on deploy success)*
+- Published EN: https://fabiomorus.com/blog/<en-slug> *(if EN translation was deployed)*
 - Review and customize for your brand voice
 - Add missing pages to `SITEMAP.md` for future auto-linking
 - Run `/blog analyze <file>` to verify quality score
