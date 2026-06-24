@@ -31,6 +31,21 @@ In this guide, a clinical therapist presents 5 scientifically supported techniqu
 
 ---
 
+**In this article:**
+- [What Happens in Your Body During a Panic Attack?](#what-happens-in-your-body-during-a-panic-attack)
+- [Step 1: Name It as a Panic Attack (Without Judgment)](#step-1-name-it-as-a-panic-attack-without-judgment)
+- [Step 2: 4-7-8 Breathing — Activate the Parasympathetic System](#step-2-4-7-8-breathing-activate-the-parasympathetic-system)
+- [Step 3: Dive Reflex — Cold Water on Your Face](#step-3-dive-reflex-cold-water-on-your-face)
+- [Step 4: 5-4-3-2-1 Grounding — Bring Your Mind to the Present](#step-4-5-4-3-2-1-grounding-bring-your-mind-to-the-present)
+- [Step 5: Box Breathing — A Second Breathing Option](#step-5-box-breathing-a-second-breathing-option)
+- [How Effective Are Breathing Techniques, Really?](#how-effective-are-breathing-techniques-really)
+- [What Mistakes Make a Panic Attack Worse?](#what-mistakes-make-a-panic-attack-worse)
+- [When Is It Time to Seek Professional Help?](#when-is-it-time-to-seek-professional-help)
+- [Frequently Asked Questions](#frequently-asked-questions)
+- [Panic Always Passes: You Can Get Through Those 10 Minutes](#panic-always-passes-you-can-get-through-those-10-minutes)
+- [Sources](#sources)
+- [About the Author](#about-the-author)
+
 ## What Happens in Your Body During a Panic Attack?
 
 A panic attack is an intense, sudden response of the sympathetic nervous system. According to the DSM-5, it **peaks within 10 minutes** and rarely exceeds 60 minutes ([DSM-5/APA, Medscape](https://emedicine.medscape.com/article/287913-overview)). Understanding this mechanism is the first step toward no longer fearing it.
@@ -122,7 +137,7 @@ The 4-7-8 technique is especially effective because the longer exhale relative t
 
 ## Step 3: Dive Reflex — Cold Water on Your Face
 
-This step is the least well known, and in clinical practice it is one of the fastest ways to bring down an elevated heart rate. [UNIQUE INSIGHT] Most panic attack guides do not mention this technique, but it is taught in DBT (Dialectical Behavior Therapy) as part of the TIPP protocol. The reason is physiological: submerging your face in cold water, or splashing ice-cold water on your cheeks and forehead, activates the mammalian dive reflex, an automatic nervous system response that slows the heart rate by 10 to 25% within 20 to 30 seconds.
+This step is the least well known, and in clinical practice it is one of the fastest ways to bring down an elevated heart rate. [UNIQUE INSIGHT] Most panic attack guides do not mention this technique, but it is taught in DBT (Dialectical Behavior Therapy) as part of the TIPP protocol ([Linehan MM, *DBT Skills Training Manual*, 2nd ed., Guilford Press, 2015](https://www.guilford.com/books/DBT-Skills-Training-Manual/Marsha-Linehan/9781462516995)). The reason is physiological: submerging your face in cold water, or splashing ice-cold water on your cheeks and forehead, activates the mammalian dive reflex, an automatic nervous system response that slows the heart rate by 10 to 25% within 20 to 30 seconds.
 
 The cold signals to the brain that the body needs to conserve oxygen, dropping the heart rate even if you are still mentally agitated. This is not placebo. It is a neurological response documented in both aquatic and terrestrial mammals.
 
@@ -186,7 +201,7 @@ The difference from 4-7-8: here the pause is equal at every stage, creating a pr
 
 ---
 
-## Breathing Technique Efficacy by Context
+## How Effective Are Breathing Techniques, Really?
 
 <svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Horizontal bar chart showing the efficacy of breathing interventions across different populations">
   <title>Efficacy of Breathing Interventions by Clinical Context</title>
@@ -219,7 +234,7 @@ The difference from 4-7-8: here the pause is equal at every stage, creating a pr
 
 ---
 
-## Common Mistakes That Make a Panic Attack Worse
+## What Mistakes Make a Panic Attack Worse?
 
 Knowing what not to do is just as important as knowing what to do. Some well-intentioned behaviors amplify the panic cycle instead of breaking it.
 
@@ -233,7 +248,7 @@ Knowing what not to do is just as important as knowing what to do. Some well-int
 
 ---
 
-## When to Seek Professional Help
+## When Is It Time to Seek Professional Help?
 
 These techniques are acute interruption tools, not substitutes for treatment. You should consider professional support when attacks occur weekly, when you are avoiding places or situations out of fear, or when your quality of life is affected. If you need immediate help, the **SAMHSA National Helpline** (1-800-662-4357) is free, confidential, and available 24/7.
 
@@ -408,6 +423,7 @@ If attacks are frequent, if you are avoiding places, or if your quality of life 
 - ResearchGate (2025). "Exploring 4-7-8 Breathing for Stress Relief and Improved Quality of Life in Chronic and Degenerative Diseases: A Scoping Review." Available at: https://www.researchgate.net/publication/394625657_Exploring_4-7-8_Breathing_for_Stress_Relief_and_Improved_Quality_of_Life_in_Chronic_and_Degenerative_Diseases_A_Scoping_Review Retrieved: June 24, 2026.
 - Parry, G.D. et al. (Feb 2023). "Therapies for panic disorder and agoraphobia: a network meta-analysis of 74 trials." PMC. Available at: https://pmc.ncbi.nlm.nih.gov/articles/PMC9975966/ Retrieved: June 24, 2026.
 - Kessler, R.C. et al. (2006). "The epidemiology of panic attacks, panic disorder, and agoraphobia in the NCS-R." PMC/NCS-R. Available at: https://pmc.ncbi.nlm.nih.gov/articles/PMC1958997/ Retrieved: June 24, 2026.
+- Linehan, M.M. (2015). *DBT Skills Training Manual*, 2nd ed. Guilford Press. ISBN 978-1-4625-1699-5. (TIPP protocol: Distress Tolerance Module.) Available at: https://www.guilford.com/books/DBT-Skills-Training-Manual/Marsha-Linehan/9781462516995
 
 ---
 

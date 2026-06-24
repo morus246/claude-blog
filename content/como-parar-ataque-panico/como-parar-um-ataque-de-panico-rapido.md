@@ -26,6 +26,21 @@ Neste guia, um terapeuta clínico apresenta 5 técnicas com suporte científico 
 
 ---
 
+**Neste artigo:**
+- [O Que Acontece no Seu Corpo Durante um Ataque de Pânico?](#o-que-acontece-no-seu-corpo-durante-um-ataque-de-panico)
+- [Passo 1: Reconheça Que É um Ataque de Pânico (Sem Julgamento)](#passo-1-reconheca-que-e-um-ataque-de-panico-sem-julgamento)
+- [Passo 2: Respiração 4-7-8 — Ative o Sistema Parassimpático](#passo-2-respiracao-4-7-8-ative-o-sistema-parassimpatico)
+- [Passo 3: Reflexo de Mergulho — Água Fria na Face](#passo-3-reflexo-de-mergulho-agua-fria-na-face)
+- [Passo 4: Grounding 5-4-3-2-1 — Traga a Mente ao Presente](#passo-4-grounding-5-4-3-2-1-traga-a-mente-ao-presente)
+- [Passo 5: Box Breathing — Uma Segunda Opção de Respiração](#passo-5-box-breathing-uma-segunda-opcao-de-respiracao)
+- [Qual a Eficácia Real das Técnicas de Respiração?](#qual-a-eficacia-real-das-tecnicas-de-respiracao)
+- [Quais Erros Pioram o Ataque de Pânico?](#quais-erros-pioram-o-ataque-de-panico)
+- [Quando Vale a Pena Procurar Ajuda Profissional?](#quando-vale-a-pena-procurar-ajuda-profissional)
+- [Perguntas Frequentes](#perguntas-frequentes)
+- [O Pânico Sempre Passa: Você Pode Atravessar Esses 10 Minutos](#o-panico-sempre-passa-voce-pode-atravessar-esses-10-minutos)
+- [Fontes](#fontes)
+- [Sobre o Autor](#sobre-o-autor)
+
 ## O Que Acontece no Seu Corpo Durante um Ataque de Pânico?
 
 Um ataque de pânico é uma resposta intensa e repentina do sistema nervoso simpático. Segundo o DSM-5, ele **atinge o pico em até 10 minutos** e raramente excede 60 minutos ([DSM-5/APA, Medscape](https://emedicine.medscape.com/article/287913-overview)). Entender esse mecanismo é o primeiro passo para deixar de temê-lo.
@@ -118,7 +133,7 @@ A técnica 4-7-8 é especialmente eficaz porque a expiração mais longa que a i
 
 ## Passo 3: Reflexo de Mergulho — Água Fria na Face
 
-Este passo é o menos conhecido e, na prática clínica, um dos mais rápidos para reduzir a frequência cardíaca acelerada. [UNIQUE INSIGHT] A maioria dos guias sobre ataque de pânico não menciona essa técnica, mas ela é ensinada no DBT (Terapia Comportamental Dialética) como parte do protocolo TIPP. O motivo é fisiológico: mergulhar o rosto em água fria ou splashar água gelada nas bochechas e testa ativa o reflexo de mergulho dos mamíferos, uma resposta automática do sistema nervoso que desacelera o coração em 10 a 25% em 20 a 30 segundos.
+Este passo é o menos conhecido e, na prática clínica, um dos mais rápidos para reduzir a frequência cardíaca acelerada. [UNIQUE INSIGHT] A maioria dos guias sobre ataque de pânico não menciona essa técnica, mas ela é ensinada no DBT (Terapia Comportamental Dialética) como parte do protocolo TIPP ([Linehan MM, *DBT Skills Training Manual*, 2a ed., Guilford Press, 2015](https://www.guilford.com/books/DBT-Skills-Training-Manual/Marsha-Linehan/9781462516995)). O motivo é fisiológico: mergulhar o rosto em água fria ou splashar água gelada nas bochechas e testa ativa o reflexo de mergulho dos mamíferos, uma resposta automática do sistema nervoso que desacelera o coração em 10 a 25% em 20 a 30 segundos.
 
 O frio sinaliza ao cérebro que o corpo precisa conservar oxigênio, derrubando a frequência cardíaca mesmo que você ainda esteja agitado mentalmente. Não é placebo. É uma resposta neurológica documentada em mamíferos aquáticos e terrestres.
 
@@ -184,7 +199,7 @@ A diferença em relação à técnica 4-7-8: aqui a pausa é igual em todos os m
 
 ---
 
-## Eficácia das Técnicas de Respiração por Contexto
+## Qual a Eficácia Real das Técnicas de Respiração?
 
 <svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gráfico de barras horizontais mostrando a eficácia das intervenções de respiração em diferentes populações">
   <title>Eficácia das Intervenções de Respiração por Contexto Clínico</title>
@@ -217,7 +232,7 @@ A diferença em relação à técnica 4-7-8: aqui a pausa é igual em todos os m
 
 ---
 
-## Erros Comuns Que Pioram o Ataque de Pânico
+## Quais Erros Pioram o Ataque de Pânico?
 
 Saber o que não fazer é tão importante quanto saber o que fazer. Alguns comportamentos bem-intencionados amplificam o ciclo de pânico em vez de interrompê-lo.
 
@@ -232,7 +247,7 @@ Saber o que não fazer é tão importante quanto saber o que fazer. Alguns compo
 
 ---
 
-## Quando Procurar Ajuda Profissional
+## Quando Vale a Pena Procurar Ajuda Profissional?
 
 Estas técnicas são ferramentas de interrupção aguda, não substitutos para tratamento. Você deve considerar [acompanhamento profissional](https://fabiomorus.com/servicos/ansiedade) quando os ataques ocorrem semanalmente, quando você está evitando lugares ou situações por medo, ou quando a qualidade de vida está comprometida.
 
@@ -410,6 +425,7 @@ Se os ataques são frequentes, se você está evitando lugares ou se a qualidade
 - ResearchGate (2025). "Exploring 4-7-8 Breathing for Stress Relief and Improved Quality of Life in Chronic and Degenerative Diseases: A Scoping Review." Disponível em: https://www.researchgate.net/publication/394625657_Exploring_4-7-8_Breathing_for_Stress_Relief_and_Improved_Quality_of_Life_in_Chronic_and_Degenerative_Diseases_A_Scoping_Review Acesso em: 24 jun. 2026.
 - Parry, G.D. et al. (Fev 2023). "Therapies for panic disorder and agoraphobia: a network meta-analysis of 74 trials." PMC. Disponível em: https://pmc.ncbi.nlm.nih.gov/articles/PMC9975966/ Acesso em: 24 jun. 2026.
 - Kessler, R.C. et al. (2006). "The epidemiology of panic attacks, panic disorder, and agoraphobia in the NCS-R." PMC/NCS-R. Disponível em: https://pmc.ncbi.nlm.nih.gov/articles/PMC1958997/ Acesso em: 24 jun. 2026.
+- Linehan, M.M. (2015). *DBT Skills Training Manual*, 2a ed. Guilford Press. ISBN 978-1-4625-1699-5. (Protocolo TIPP: Distress Tolerance Module.) Disponível em: https://www.guilford.com/books/DBT-Skills-Training-Manual/Marsha-Linehan/9781462516995
 
 ---
 
