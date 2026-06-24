@@ -89,7 +89,7 @@ def _parse_frontmatter_full(text: str) -> tuple[str, str]:
 
 def _normalize_pt_frontmatter(
     fm_text: str, slug: str, en_slug: Optional[str],
-    category: Optional[str], hero_rel: str
+    category: Optional[str], hero_url: str
 ) -> str:
     lines = fm_text.splitlines()
     out: list[str] = []
@@ -108,12 +108,12 @@ def _normalize_pt_frontmatter(
             continue
         if key == "coverImage":
             if "image" not in seen:
-                out.append(f'image: "{hero_rel}"')
+                out.append(f'image: "{hero_url}"')
                 seen.add("image")
             continue
         if key == "image":
             if "image" not in seen:
-                out.append(f'image: "{hero_rel}"')
+                out.append(f'image: "{hero_url}"')
                 seen.add("image")
             continue
         if key == "coverImageAlt":
@@ -142,14 +142,14 @@ def _normalize_pt_frontmatter(
     if en_slug and "translationKey" not in seen:
         out.append(f'translationKey: "pair-{slug}-{en_slug}"')
     if "image" not in seen:
-        out.append(f'image: "{hero_rel}"')
+        out.append(f'image: "{hero_url}"')
 
     return "\n".join(out)
 
 
 def _normalize_en_frontmatter(
     fm_text: str, slug: str, en_slug: str,
-    category: Optional[str], hero_rel: str
+    category: Optional[str], hero_url: str
 ) -> str:
     lines = fm_text.splitlines()
     out: list[str] = []
@@ -168,12 +168,12 @@ def _normalize_en_frontmatter(
             continue
         if key == "coverImage":
             if "image" not in seen:
-                out.append(f'image: "{hero_rel}"')
+                out.append(f'image: "{hero_url}"')
                 seen.add("image")
             continue
         if key == "image":
             if "image" not in seen:
-                out.append(f'image: "{hero_rel}"')
+                out.append(f'image: "{hero_url}"')
                 seen.add("image")
             continue
         if key == "coverImageAlt":
@@ -206,7 +206,7 @@ def _normalize_en_frontmatter(
     if "translationKey" not in seen:
         out.append(f'translationKey: "pair-{slug}-{en_slug}"')
     if "image" not in seen:
-        out.append(f'image: "{hero_rel}"')
+        out.append(f'image: "{hero_url}"')
 
     return "\n".join(out)
 
@@ -254,6 +254,7 @@ def main() -> int:
     _to_webp(hero_src, hero_dest)
     written: list[Path] = [hero_dest]
     hero_rel = f"/blog/{slug}-hero.webp"
+    hero_url = f"https://fabiomorus.com/blog/{slug}-hero.webp"
 
     # Step 5 + detect EN
     content = canonical_md.read_text(encoding="utf-8")
@@ -275,7 +276,7 @@ def main() -> int:
             )
     en_slug = en_md.stem if en_md else None
 
-    fm_pt = _normalize_pt_frontmatter(fm_raw, slug, en_slug, args.category, hero_rel)
+    fm_pt = _normalize_pt_frontmatter(fm_raw, slug, en_slug, args.category, hero_url)
 
     # Step 6
     pt_dest = site / "src" / "content" / "blog" / f"{slug}.md"
@@ -286,7 +287,7 @@ def main() -> int:
     if en_md:
         en_content = en_md.read_text(encoding="utf-8")
         fm_en_raw, en_body = _parse_frontmatter_full(en_content)
-        fm_en = _normalize_en_frontmatter(fm_en_raw, slug, en_slug, args.category, hero_rel)
+        fm_en = _normalize_en_frontmatter(fm_en_raw, slug, en_slug, args.category, hero_url)
         en_dest = site / "src" / "content" / "blog-en" / f"{en_slug}.md"
         en_dest.parent.mkdir(parents=True, exist_ok=True)
         en_dest.write_text(_assemble_md(fm_en, en_body), encoding="utf-8")
@@ -312,7 +313,7 @@ def main() -> int:
     result: dict = {
         "status": "ok",
         "pt_url": f"https://fabiomorus.com/blog/{slug}",
-        "hero": hero_rel,
+        "hero": hero_url,
     }
     if en_slug:
         result["en_url"] = f"https://fabiomorus.com/blog/{en_slug}"
