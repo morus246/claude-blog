@@ -176,6 +176,9 @@ When reviewing citations, verify against this tier system:
 2. [Second priority]
 3. [Third priority]
 
+SCORE: [N]/100
+P0_COUNT: [exact number of unresolved P0 issues]
+P1_COUNT: [exact number of unresolved P1 issues]
 Nonce: [paste the 32-hex value from <draft>/.review-nonce here verbatim]
 BLOCKING: true|false (one-line reason)
 ```
@@ -190,12 +193,13 @@ To find the nonce, the agent must read `<draft>/.review-nonce` (the orchestrator
 
 ## Blocking Decision (v1.9.0)
 
-The scorecard MUST end with a `BLOCKING: true|false (reason)` line. This line is machine-readable by `scripts/blog_preflight.py` Gate 4 and drives the iteration loop in the orchestrator.
+The scorecard MUST end with the five machine-readable lines shown above. Gate 4 validates `SCORE`, `P0_COUNT`, `P1_COUNT`, `Nonce`, and `BLOCKING` independently; a contradictory `BLOCKING: false` cannot override the numeric policy.
 
 Set `BLOCKING: true` if ANY of the following hold:
 
 - Overall score below 90/100 (the Exceptional band)
 - Any P0 issue from `skills/blog/references/editorial-heuristics.md` (fabricated stats, broken structure, plagiarism risk; see that file for the full list)
+- Any unresolved P1 issue. P1 items must be fixed in the current iteration, not deferred to delivery.
 - Burstiness score in the Flagged range (too uniform sentence length)
 - More than 3 known AI phrases detected
 - Vocabulary diversity (TTR) below 0.4
@@ -206,7 +210,7 @@ Set `BLOCKING: false` only when none of those conditions hold. The reason field 
 ```
 BLOCKING: true (overall 87/100 below threshold; P0 on heuristic 5)
 BLOCKING: true (TTR 0.32 indicates AI-generated content; vary vocabulary)
-BLOCKING: false (cleared all gates; 92/100 overall, no P0)
+BLOCKING: false (cleared all gates; 92/100 overall, no P0 or P1)
 ```
 
 The reviewer is now a **blocking** gate, not advisory. The user does not see the draft until this line says `false`.

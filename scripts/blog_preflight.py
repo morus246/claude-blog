@@ -3,8 +3,8 @@
 
 Implements Gates 1, 2, 3, and 5 of the v1.9.0 Blog Delivery Contract.
 Gate 4 (Content Review) is dispatched by the orchestrator as the
-blog-reviewer agent; this script only verifies that the agent's output
-exists and that its BLOCKING decision is `false`.
+blog-reviewer agent; this script independently verifies the agent's score,
+open P0/P1 counts, nonce, and BLOCKING decision.
 
 Output:
   <draft>/preflight-report.json: machine-readable gate results
@@ -159,7 +159,13 @@ def _gate_result(gate: int, name: str, passed: bool, violations: Optional[list] 
 
 
 def _has_module(name: str) -> bool:
-    return importlib.util.find_spec(name) is not None
+    try:
+        return importlib.util.find_spec(name) is not None
+    except (ImportError, ModuleNotFoundError, ValueError):
+        # Dotted imports such as ``google.genai`` raise when the parent
+        # namespace is absent instead of returning None. Capability discovery
+        # must report an unavailable optional dependency, not crash Gate 1.
+        return False
 
 
 def _project_root() -> Path:
@@ -551,20 +557,49 @@ def gate_5_asset_link_integrity(draft_dir: Path) -> dict:
                 f"non-http(s) URL scheme is not allowed in published links: {href}"
             )
 
-    # JSON-LD validation
+    # JSON-LD validation. Supplemental schemas are commonly emitted as
+    # separate script blocks, so parse each block independently and use the
+    # BlogPosting object for delivery-contract fields and word count.
     json_ld_ok = False
     declared_word_count: Optional[int] = None
+    blog_posting: Optional[dict] = None
     if parser.json_ld_blocks:
-        try:
-            obj = json.loads("".join(parser.json_ld_blocks))
-            json_ld_ok = True
+        parsed_nodes: list[dict] = []
+        parse_failed = False
+        for index, block in enumerate(parser.json_ld_blocks, start=1):
+            try:
+                obj = json.loads(block)
+            except json.JSONDecodeError as e:
+                parse_failed = True
+                violations.append(f"JSON-LD block {index} invalid: {e}")
+                continue
+
+            candidates = obj if isinstance(obj, list) else [obj]
+            for candidate in candidates:
+                if not isinstance(candidate, dict):
+                    continue
+                graph = candidate.get("@graph")
+                if isinstance(graph, list):
+                    parsed_nodes.extend(node for node in graph if isinstance(node, dict))
+                else:
+                    parsed_nodes.append(candidate)
+
+        for node in parsed_nodes:
+            node_type = node.get("@type")
+            types = node_type if isinstance(node_type, list) else [node_type]
+            if "BlogPosting" in types:
+                blog_posting = node
+                break
+
+        if blog_posting is None:
+            violations.append("no BlogPosting JSON-LD object found")
+        else:
             required = ("headline", "image", "datePublished", "author")
-            missing = [k for k in required if not obj.get(k)]
+            missing = [k for k in required if not blog_posting.get(k)]
             if missing:
                 violations.append(f"JSON-LD missing required fields: {missing}")
-            declared_word_count = obj.get("wordCount")
-        except json.JSONDecodeError as e:
-            violations.append(f"JSON-LD invalid: {e}")
+            declared_word_count = blog_posting.get("wordCount")
+        json_ld_ok = not parse_failed and blog_posting is not None
     else:
         violations.append("no JSON-LD <script> block present")
 
@@ -595,8 +630,10 @@ def gate_5_asset_link_integrity(draft_dir: Path) -> dict:
 
 
 def gate_4_content_review(draft_dir: Path) -> dict:
-    """Check that the blog-reviewer agent has run and emitted review.md
-    with `BLOCKING: false` AND a matching Nonce (v1.9.1).
+    """Validate the reviewer decision, metrics, and nonce in review.md.
+
+    A review passes only when SCORE is at least 90, P0_COUNT and P1_COUNT
+    are both zero, BLOCKING is false, and the nonce matches when present.
 
     Nonce-bound provenance (VULN-803, v1.9.1):
       * If <draft>/.review-nonce exists, review.md MUST contain a line
@@ -659,25 +696,73 @@ def gate_4_content_review(draft_dir: Path) -> dict:
             "the blog-reviewer agent."
         )
 
-    m = re.search(r"^BLOCKING:\s*(true|false)\s*(?:\((.*?)\))?\s*$", text, re.IGNORECASE | re.MULTILINE)
+    metric_specs = {
+        "SCORE": (re.compile(r"^SCORE:\s*(\d{1,3})/100\s*$", re.MULTILINE), 100),
+        "P0_COUNT": (re.compile(r"^P0_COUNT:\s*(\d+)\s*$", re.MULTILINE), None),
+        "P1_COUNT": (re.compile(r"^P1_COUNT:\s*(\d+)\s*$", re.MULTILINE), None),
+    }
+    metrics: dict[str, int] = {}
+    violations: list[str] = []
+    for label, (pattern, maximum) in metric_specs.items():
+        matches = pattern.findall(text)
+        if len(matches) != 1:
+            violations.append(
+                f"review.md must contain exactly one `{label}: <integer>"
+                f"{'/100' if label == 'SCORE' else ''}` line"
+            )
+            continue
+        value = int(matches[0])
+        if maximum is not None and value > maximum:
+            violations.append(f"{label} {value} exceeds maximum {maximum}")
+            continue
+        metrics[label] = value
+
+    m = re.search(
+        r"^BLOCKING:\s*(true|false)\s*(?:\((.*?)\))?\s*$",
+        text,
+        re.IGNORECASE | re.MULTILINE,
+    )
     if not m:
+        violations.append(
+            "review.md present but no `BLOCKING: true|false` line found at end of scorecard"
+        )
+
+    if violations:
         return _gate_result(
             4, "Content Review", False,
-            ["review.md present but no `BLOCKING: true|false` line found at end of scorecard"],
-            nonce_warnings,
+            violations, nonce_warnings,
+            score=metrics.get("SCORE"),
+            p0_count=metrics.get("P0_COUNT"),
+            p1_count=metrics.get("P1_COUNT"),
         )
+
+    score = metrics["SCORE"]
+    p0_count = metrics["P0_COUNT"]
+    p1_count = metrics["P1_COUNT"]
     blocking = m.group(1).lower() == "true"
     reason = (m.group(2) or "").strip()
+    policy_violations = []
+    if score < 90:
+        policy_violations.append(f"SCORE {score}/100 is below 90/100")
+    if p0_count > 0:
+        policy_violations.append(f"P0_COUNT is {p0_count}; all P0 issues must be resolved")
+    if p1_count > 0:
+        policy_violations.append(f"P1_COUNT is {p1_count}; all P1 issues must be resolved")
     if blocking:
+        policy_violations.append(f"reviewer blocked: {reason or 'see review.md'}")
+
+    if policy_violations:
         return _gate_result(
             4, "Content Review", False,
-            [f"reviewer blocked: {reason or 'see review.md'}"],
+            policy_violations,
             nonce_warnings,
-            blocking=True, reason=reason,
+            blocking=blocking, reason=reason,
+            score=score, p0_count=p0_count, p1_count=p1_count,
         )
     return _gate_result(
         4, "Content Review", True, [], nonce_warnings,
         blocking=False, reason=reason,
+        score=score, p0_count=p0_count, p1_count=p1_count,
     )
 
 

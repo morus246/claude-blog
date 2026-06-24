@@ -11,7 +11,7 @@ This contract is the v1.9.0 answer to a failure pattern from the v1.8.x cycle: s
 | 1. Capability Discovery | Required tools + agents are available before write begins | Block if no image-gen path; block if reviewer agent missing | `scripts/blog_preflight.py --gate 1` |
 | 2. Format Completeness | `.md` + `.html` + `.pdf` + `hero.png` all present | Block on any missing artifact | `scripts/blog_render.py` produces all three |
 | 3. Visual Verification | Rendered HTML has no SVG overflow, no console errors, valid JSON-LD | Block on any defect; preserve screenshots | `scripts/blog_preflight.py --gate 3` via `patchright` |
-| 4. Content Review | `blog-reviewer` scores ≥ 90/100 AND zero P0 issues | Block + iterate | `agents/blog-reviewer.md` (now blocking) |
+| 4. Content Review | `blog-reviewer` scores ≥ 90/100 AND has zero unresolved P0/P1 issues | Block + iterate | `agents/blog-reviewer.md` + independent checks in `blog_preflight.py` |
 | 5. Asset + Link Integrity | Every `<img>` resolves, every `<a>` returns 200, schema validates | Block on any 404 or count mismatch | `scripts/blog_preflight.py --gate 5` |
 
 All gates run sequentially. First failure halts the chain and triggers the iteration loop. Successful drafts ship with `preflight-report.json` + `review.md` + `preview/*.png` in the draft folder.
@@ -75,18 +75,21 @@ The existing `blog-reviewer` agent (`agents/blog-reviewer.md`) runs against the 
 ### Blocking decision rules
 
 - Overall score **< 90/100** → BLOCK
-- **Any P0 issue** from `editorial-heuristics.md` → BLOCK (a draft can score 95 and still have one load-bearing fabricated stat; P0 is an absolute filter independent of the numeric score)
+- **Any unresolved P0 or P1 issue** → BLOCK. P1 fixes happen in the current iteration rather than being deferred to delivery.
 - AI-detection burstiness flag OR more than 3 known AI phrases OR vocabulary diversity (TTR) below 0.4 → BLOCK
 - All clear → proceed to Gate 5
 
-The blocking decision is emitted as the last line of the reviewer scorecard, in the format:
+The reviewer emits five machine-readable lines at the end of the scorecard:
 
 ```
-BLOCKING: true (Overall 87/100 below threshold; P0 on heuristic 5)
+SCORE: 92/100
+P0_COUNT: 0
+P1_COUNT: 0
+Nonce: 0123456789abcdef0123456789abcdef
 BLOCKING: false (cleared all gates)
 ```
 
-Machine-readable by `scripts/blog_preflight.py` so the orchestrator does not have to parse the human-readable scorecard.
+Gate 4 validates every field independently. Missing or malformed fields block, as do score below 90, any non-zero P0/P1 count, nonce mismatch, or `BLOCKING: true`. A contradictory `BLOCKING: false` cannot override the numeric policy.
 
 Reviewer report saved to `<draft-folder>/review.md`. Shown to the user on success ("here is why this passed") and on final failure ("here is why this is still blocked after 3 iterations").
 

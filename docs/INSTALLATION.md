@@ -62,12 +62,15 @@ dev environment with:
 
 ```bash
 pip install uv          # one-time
-uv sync --frozen        # installs from uv.lock with hash verification
+uv sync --frozen --extra dev --extra presentation
+.venv/bin/patchright install chromium
 ```
 
 This is the recommended path for CI, audit, and any context where
-"works on my machine" is not enough. The legacy `pip install -e ".[dev]"`
-flow still works; it just resolves transitives freshly each time.
+"works on my machine" is not enough. The `dev` extra installs the test
+toolchain; `presentation` installs the Delivery Contract runtime. The legacy
+`pip install -e ".[dev,presentation]"` flow still works; it just resolves
+transitives freshly each time. Follow it with `patchright install chromium`.
 
 Regenerate `uv.lock` after editing `pyproject.toml` dependency bounds:
 

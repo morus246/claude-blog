@@ -49,6 +49,26 @@ def _make_draft(tmp_path: Path, review_text: str = "", nonce_text: str | None = 
     return draft
 
 
+def _review(
+    nonce: str | None = None,
+    *,
+    score: int = 90,
+    p0_count: int = 0,
+    p1_count: int = 0,
+    blocking: bool = False,
+) -> str:
+    lines = [
+        "Scorecard...",
+        f"SCORE: {score}/100",
+        f"P0_COUNT: {p0_count}",
+        f"P1_COUNT: {p1_count}",
+    ]
+    if nonce is not None:
+        lines.append(f"Nonce: {nonce}")
+    lines.append(f"BLOCKING: {'true' if blocking else 'false'} (test review)")
+    return "\n".join(lines) + "\n"
+
+
 def test_init_review_nonce_creates_file_with_csprng_value(tmp_path, preflight_module):
     draft = tmp_path / "post"
     draft.mkdir()
@@ -72,7 +92,7 @@ def test_init_review_nonce_overwrites_existing(tmp_path, preflight_module):
 
 def test_gate_4_passes_when_nonce_matches(tmp_path, preflight_module):
     nonce = "a" * 32
-    review = f"Scorecard...\nNonce: {nonce}\nBLOCKING: false (cleared)\n"
+    review = _review(nonce)
     draft = _make_draft(tmp_path, review_text=review, nonce_text=nonce)
     result = preflight_module.gate_4_content_review(draft)
     assert result["passed"] is True, f"Gate should pass with matching nonce: {result}"
@@ -80,7 +100,7 @@ def test_gate_4_passes_when_nonce_matches(tmp_path, preflight_module):
 
 def test_gate_4_fails_when_nonce_file_present_but_review_lacks_nonce(tmp_path, preflight_module):
     nonce = "b" * 32
-    review = "Scorecard...\nBLOCKING: false (cleared)\n"  # no Nonce: line
+    review = _review()  # no Nonce: line
     draft = _make_draft(tmp_path, review_text=review, nonce_text=nonce)
     result = preflight_module.gate_4_content_review(draft)
     assert result["passed"] is False, "Gate should fail when nonce file exists but review lacks Nonce: line"
@@ -90,7 +110,7 @@ def test_gate_4_fails_when_nonce_file_present_but_review_lacks_nonce(tmp_path, p
 def test_gate_4_fails_when_review_has_wrong_nonce(tmp_path, preflight_module):
     real_nonce = "c" * 32
     fake_nonce = "d" * 32
-    review = f"Scorecard...\nNonce: {fake_nonce}\nBLOCKING: false (cleared)\n"
+    review = _review(fake_nonce)
     draft = _make_draft(tmp_path, review_text=review, nonce_text=real_nonce)
     result = preflight_module.gate_4_content_review(draft)
     assert result["passed"] is False, "Gate should fail on nonce mismatch"
@@ -100,7 +120,7 @@ def test_gate_4_fails_when_review_has_wrong_nonce(tmp_path, preflight_module):
 def test_gate_4_soft_pass_when_nonce_file_absent_backwards_compat(tmp_path, preflight_module):
     """v1.9.x backwards compat: drafts initialised before v1.9.1 (no nonce file)
     pass with a deprecation warning, do not block."""
-    review = "Scorecard...\nBLOCKING: false (cleared)\n"
+    review = _review()
     draft = _make_draft(tmp_path, review_text=review)  # no nonce file
     assert not (draft / ".review-nonce").exists()
     result = preflight_module.gate_4_content_review(draft)
@@ -116,10 +136,73 @@ def test_gate_4_nonce_must_be_exact_match_no_suffix_attack(tmp_path, preflight_m
     # Attacker emits a different 32-char string that contains the real nonce as
     # a prefix or suffix in raw text.
     leaked = nonce + "f" * 4  # 36 chars, starts with the real nonce
-    review = f"Some text containing the leaked nonce.\nNonce: {leaked}\nBLOCKING: false\n"
+    review = _review().replace("BLOCKING:", f"Some text containing the leaked nonce.\nNonce: {leaked}\nBLOCKING:")
     draft = _make_draft(tmp_path, review_text=review, nonce_text=nonce)
     result = preflight_module.gate_4_content_review(draft)
     assert result["passed"] is False, "Suffix attack on nonce match must be refused"
+
+
+@pytest.mark.parametrize(
+    ("score", "p0_count", "p1_count", "expected_fragment"),
+    [
+        (89, 0, 0, "below 90"),
+        (95, 1, 0, "P0"),
+        (95, 0, 1, "P1"),
+    ],
+)
+def test_gate_4_enforces_machine_readable_thresholds_even_if_reviewer_says_false(
+    tmp_path, preflight_module, score, p0_count, p1_count, expected_fragment
+):
+    nonce = "f" * 32
+    draft = _make_draft(
+        tmp_path,
+        review_text=_review(
+            nonce,
+            score=score,
+            p0_count=p0_count,
+            p1_count=p1_count,
+            blocking=False,
+        ),
+        nonce_text=nonce,
+    )
+
+    result = preflight_module.gate_4_content_review(draft)
+
+    assert result["passed"] is False
+    assert any(expected_fragment in violation for violation in result["violations"])
+
+
+@pytest.mark.parametrize("missing_field", ["SCORE", "P0_COUNT", "P1_COUNT"])
+def test_gate_4_blocks_when_machine_readable_field_is_missing(
+    tmp_path, preflight_module, missing_field
+):
+    nonce = "1" * 32
+    review = "\n".join(
+        line for line in _review(nonce).splitlines()
+        if not line.startswith(f"{missing_field}:")
+    ) + "\n"
+    draft = _make_draft(tmp_path, review_text=review, nonce_text=nonce)
+
+    result = preflight_module.gate_4_content_review(draft)
+
+    assert result["passed"] is False
+    assert any(missing_field in violation for violation in result["violations"])
+
+
+def test_gate_4_passes_at_exact_threshold_with_no_open_p0_or_p1(tmp_path, preflight_module):
+    nonce = "2" * 32
+    draft = _make_draft(tmp_path, review_text=_review(nonce), nonce_text=nonce)
+
+    result = preflight_module.gate_4_content_review(draft)
+
+    assert result["passed"] is True
+    assert result["score"] == 90
+    assert result["p0_count"] == 0
+    assert result["p1_count"] == 0
+
+
+def test_has_module_returns_false_for_missing_parent_namespace(preflight_module):
+    assert preflight_module._has_module("definitely_missing_parent.child") is False
 
 
 def test_init_review_nonce_cli_flag(tmp_path):

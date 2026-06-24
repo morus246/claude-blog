@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License: MIT">
   <img src="https://img.shields.io/badge/Python-3.11%2B-blue" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Sub--Skills-30-orange" alt="Sub-Skills">
-  <img src="https://img.shields.io/badge/Tests-212%20passing-brightgreen" alt="Tests: 212 passing">
+  <img src="https://img.shields.io/badge/Tests-217%20passing-brightgreen" alt="Tests: 217 passing">
 </p>
 
 <p align="center">
@@ -388,7 +388,7 @@ Next.js MDX, Astro, Hugo, Jekyll, WordPress, Ghost, 11ty, Gatsby, and static HTM
 No. Every cited statistic flows through `/blog factcheck`, which fetches the source URL and scores the claim confidence (exact match, paraphrase, not found). The `blog-reviewer` agent blocks publication if a citation cannot be verified or if AI-content detection flags the prose as machine-generated.
 
 ### What is the 5-gate Blog Delivery Contract?
-A code-enforced pre-presentation pipeline that runs on every draft: Capability Discovery, Format Completeness, Visual Verification at 3 viewport widths, Content Review (BLOCKING; score 90+ and zero P0), and Asset + Link Integrity. The orchestrator iterates the writer up to 3 times on any gate failure before escalating to you. Full spec in [`skills/blog/references/blog-delivery-contract.md`](skills/blog/references/blog-delivery-contract.md).
+A code-enforced pre-presentation pipeline that runs on every draft: Capability Discovery, Format Completeness, Visual Verification at 3 viewport widths, Content Review (BLOCKING; score 90+ and zero unresolved P0/P1), and Asset + Link Integrity. The orchestrator iterates the writer up to 3 times on any gate failure before escalating to you. Full spec in [`skills/blog/references/blog-delivery-contract.md`](skills/blog/references/blog-delivery-contract.md).
 
 ### Can I use claude-blog in multiple languages?
 Yes. `/blog multilingual <topic> --languages en,de,fr,es,ja` writes the post, translates it preserving frontmatter and schema, runs cultural deep-adaptation per locale, and emits hreflang tags plus a CMS-ready language map in a single command.

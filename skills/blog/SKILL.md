@@ -346,8 +346,8 @@ Standard execution order for `/blog write`:
 3. **Outline**: Build section structure from template + research gaps
 4. **Write**: Spawn `blog-writer` agent with research packet and outline
 5. **Optimize**: Spawn `blog-seo` agent for on-page validation
-6. **Score**: Spawn `blog-reviewer` agent for 100-point quality audit
-6.5. **Delivery Contract Enforcement (v1.9.0)**: Run the 5-gate preflight per `references/blog-delivery-contract.md`. Generate hero via `scripts/generate_hero.py`. Render `.md`/`.html`/`.pdf` via `scripts/blog_render.py`. Run `scripts/blog_preflight.py --draft <folder> --strict`. Check the `BLOCKING:` line in `<folder>/review.md` written by Step 6. If any gate blocks: loop back to Step 4 with the failure diagnostic; max 3 iterations; on the 3rd failure, STOP and present the diagnostic instead of the draft. The user is NEVER the first reviewer; the gates are.
+6. **Score**: After rendering, initialize `.review-nonce` and spawn `blog-reviewer` against the returned HTML path. Require `SCORE`, `P0_COUNT`, `P1_COUNT`, matching `Nonce`, and final `BLOCKING` fields.
+6.5. **Delivery Contract Enforcement (v1.9.0)**: Run the 5-gate preflight per `references/blog-delivery-contract.md`. Prefer `.venv/bin/python`, generate the hero, render `.md`/`.html`/`.pdf` with `blog_render.py --json`, and pass its returned HTML path to `blog_hygiene.py` and the reviewer. Run `blog_preflight.py --draft <folder> --strict`; Gate 4 independently enforces score 90+ and zero P0/P1. If any gate blocks: loop back to Step 4 with the failure diagnostic; max 3 iterations; on the 3rd failure, STOP and present the diagnostic instead of the draft. The user is NEVER the first reviewer; the gates are.
 7. **Deliver**: Output final content with scorecard, `preview/*.png` screenshots, and improvement notes ONLY when all gates pass
 
 For `/blog analyze`, only steps 1 and 6 run (read + score).

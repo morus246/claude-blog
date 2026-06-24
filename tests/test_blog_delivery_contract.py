@@ -139,6 +139,14 @@ def test_blog_write_skill_references_contract() -> None:
         "blog-write/SKILL.md must call blog_preflight.py"
     assert "blog-reviewer" in text, \
         "blog-write/SKILL.md must dispatch blog-reviewer"
+    assert "--init-review-nonce" in text, \
+        "blog-write/SKILL.md must initialize the review nonce before dispatch"
+    assert ".venv/bin/python" in text, \
+        "blog-write/SKILL.md must prefer the project virtualenv interpreter"
+    assert "--out-dir <folder> --json" in text, \
+        "blog-write/SKILL.md must request the renderer's canonical output paths"
+    assert "returned `html` path" in text, \
+        "blog-write/SKILL.md must pass the rendered slug path to blog_hygiene"
 
 
 def test_blog_rewrite_skill_references_contract() -> None:
@@ -147,6 +155,8 @@ def test_blog_rewrite_skill_references_contract() -> None:
         "blog-rewrite/SKILL.md must reference the delivery contract"
     assert "blog_preflight.py" in text, \
         "blog-rewrite/SKILL.md must call blog_preflight.py"
+    for required in ("--init-review-nonce", ".venv/bin/python", "--out-dir <folder> --json", "returned `html` path"):
+        assert required in text, f"blog-rewrite/SKILL.md missing contract runtime detail: {required}"
 
 
 def test_orchestrator_references_contract() -> None:
@@ -155,12 +165,15 @@ def test_orchestrator_references_contract() -> None:
         "skills/blog/SKILL.md must reference the delivery contract"
     assert re.search(r"\b6\.5\b|Step 6\.5", text), \
         "skills/blog/SKILL.md must declare Step 6.5 (Delivery Contract Enforcement)"
+    for required in ("SCORE", "P0_COUNT", "P1_COUNT", "Nonce"):
+        assert required in text, f"orchestrator missing Gate 4 field: {required}"
 
 
 def test_reviewer_emits_blocking_line() -> None:
     text = REVIEWER.read_text(encoding="utf-8")
-    assert "BLOCKING:" in text, \
-        "agents/blog-reviewer.md must emit a `BLOCKING:` line in its scorecard"
+    for field in ("SCORE:", "P0_COUNT:", "P1_COUNT:", "Nonce:", "BLOCKING:"):
+        assert field in text, \
+            f"agents/blog-reviewer.md must emit a `{field}` line in its scorecard"
     assert "Blocking Decision" in text or "Blocking decision" in text, \
         "agents/blog-reviewer.md must document the blocking decision rules"
 
@@ -358,6 +371,35 @@ def test_preflight_gate_5_flags_non_http_scheme_as_violation(tmp_path: Path) -> 
     assert "non-http(s) URL scheme" in result.stdout
     assert "file:///etc/passwd" in result.stdout
     assert "javascript:" in result.stdout
+
+
+def test_preflight_gate_5_accepts_multiple_valid_jsonld_blocks(tmp_path: Path) -> None:
+    """Gate 5 must parse BlogPosting plus supplemental schemas separately."""
+    (tmp_path / "post.md").write_text(_VALID_FRONTMATTER + "word\n", encoding="utf-8")
+    (tmp_path / "post.html").write_text(
+        '<!DOCTYPE html><html><head>'
+        '<meta property="og:image" content="hero.png">'
+        '<script type="application/ld+json">'
+        '{"@type":"BlogPosting","headline":"x","image":"hero.png",'
+        '"datePublished":"2026-05-17","author":{"name":"x"},"wordCount":1}'
+        '</script>'
+        '<script type="application/ld+json">'
+        '{"@type":"FAQPage","mainEntity":[]}'
+        '</script></head><body><article>word</article></body></html>',
+        encoding="utf-8",
+    )
+    (tmp_path / "hero.png").write_bytes(b"\x89PNG\r\n\x1a\n")
+
+    result = subprocess.run(
+        [sys.executable, str(PREFLIGHT_PATH), "--draft", str(tmp_path),
+         "--gate", "5", "--no-strict", "--reset-iterations", "--json"],
+        capture_output=True, text=True, check=False,
+    )
+
+    report = json.loads(result.stdout)
+    gate = report["gates"][0]
+    assert gate["passed"] is True, gate
+    assert gate["json_ld_valid"] is True
 
 
 # ---------------------------------------------------------------------------
