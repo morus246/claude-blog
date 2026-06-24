@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License: MIT">
   <img src="https://img.shields.io/badge/Python-3.11%2B-blue" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Sub--Skills-30-orange" alt="Sub-Skills">
-  <img src="https://img.shields.io/badge/Tests-258%20passing-brightgreen" alt="Tests: 258 passing">
+  <img src="https://img.shields.io/badge/Tests-261%20passing-brightgreen" alt="Tests: 258 passing">
 </p>
 
 <p align="center">
