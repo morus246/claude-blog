@@ -304,7 +304,13 @@ def main() -> int:
         deploy_sh = site / "deploy.sh"
         if not deploy_sh.exists():
             _fail(f"deploy.sh not found at {deploy_sh}")
-        deploy = subprocess.run(["bash", "deploy.sh"], cwd=str(site), capture_output=True, text=True)
+        deploy = subprocess.run(
+            ["bash", "deploy.sh"],
+            cwd=str(site),
+            capture_output=True,
+            encoding="utf-8",
+            errors="replace",
+        )
         if deploy.returncode != 0:
             _fail("deploy.sh failed. Files remain in fabiomorus repo — revert manually if needed.",
                   {"stderr": deploy.stderr[-2000:]})
