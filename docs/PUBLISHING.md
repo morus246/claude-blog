@@ -25,7 +25,7 @@ The two repos share git history. The private mirror runs ahead of public; public
 3. **Pre-release sanity check** (run locally before pushing to public):
 
    ```bash
-   python3 -m pytest tests/                        # all 160 tests pass
+   python3 -m pytest tests/                        # all 189 tests pass
    python3 scripts/lint_prose.py --root .          # zero prose-hygiene violations
    claude plugin validate .                        # marketplace manifest valid
    ```

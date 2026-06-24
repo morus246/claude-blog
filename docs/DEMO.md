@@ -63,7 +63,7 @@ python3 skills/blog-google/scripts/google_auth.py --tier --json
 # 3. Plugin validate
 claude plugin validate .
 
-# 4. Full test suite (52/52 passing post-audit)
+# 4. Full test suite (189/189 passing post-audit)
 python -m pytest tests/ -q
 
 # 5. Sample local SVG chart

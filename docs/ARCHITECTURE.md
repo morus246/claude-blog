@@ -501,6 +501,6 @@ DISCOURSE.md, auto-loaded via `scripts/load_untrusted_root.py` with
 CSPRNG nonce fencing). v1.8.4+ enforces prose hygiene and version
 coherence via CI (see `scripts/lint_prose.py`, `tests/test_version_coherence.py`).
 v1.9.0 adds the 5-gate Blog Delivery Contract (see
-`skills/blog/references/blog-delivery-contract.md`) and 160-test pytest
+`skills/blog/references/blog-delivery-contract.md`) and 189-test pytest
 suite including mutation-test-verified XSS, symlink, and frontmatter
 regression coverage.

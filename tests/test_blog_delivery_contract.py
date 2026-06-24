@@ -276,6 +276,28 @@ def test_h1_strip_handles_inline_formatting(tmp_path: Path) -> None:
     assert h1_count == 1, f"expected exactly 1 H1, got {h1_count}"
 
 
+def test_inline_svg_block_is_not_escaped(tmp_path: Path) -> None:
+    """Regression: an inline <svg> chart embedded in the markdown must render
+    as raw SVG, not HTML-escaped source text. The stdlib markdown fallback
+    (used when python-markdown is absent) previously passed block-level HTML
+    through _inline(), turning <svg> into &lt;svg&gt; and breaking charts."""
+    svg = (
+        '<svg viewBox="0 0 100 50" role="img" aria-label="demo">\n'
+        '  <rect x="0" y="0" width="40" height="20" fill="#0d9488"/>\n'
+        '  <text x="5" y="40">Fase 1 - PICO</text>\n'
+        '</svg>'
+    )
+    rc, _, stderr, htmls = _render(tmp_path, f"Intro paragraph.\n\n{svg}\n\nOutro paragraph.")
+    assert rc == 0, f"render failed: {stderr}"
+    rendered = htmls[0].read_text(encoding="utf-8")
+    assert "<svg" in rendered, "inline SVG was not emitted as raw markup"
+    assert "&lt;svg" not in rendered, "inline SVG was HTML-escaped instead of passed through"
+    assert "</svg>" in rendered, "SVG closing tag missing from output"
+    assert "<rect" in rendered and "<text" in rendered, "SVG inner elements were dropped or escaped"
+    # Surrounding prose must still render normally.
+    assert "Intro paragraph." in rendered and "Outro paragraph." in rendered
+
+
 def test_symlink_to_md_is_refused(tmp_path: Path) -> None:
     """S2 regression: renderer must refuse to follow symlinks."""
     real = tmp_path / "real.md"

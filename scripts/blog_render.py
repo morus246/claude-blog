@@ -175,6 +175,27 @@ def _markdown_to_html(body: str) -> str:
         return _stdlib_markdown(body)
 
 
+# Block-level HTML elements the stdlib fallback must emit verbatim instead
+# of HTML-escaping as paragraph text. Without this, an inline <svg> chart or
+# a <figure> wrapper embedded in the markdown renders as escaped "&lt;svg&gt;"
+# source text. python-markdown handles raw HTML natively; this set restores
+# parity for the stdlib fallback path (taken when python-markdown is absent).
+_HTML_BLOCK_TAGS = {
+    "svg", "figure", "figcaption", "div", "table", "section",
+    "article", "aside", "header", "footer", "nav", "details", "picture",
+}
+_HTML_BLOCK_OPEN = re.compile(r"^<([a-zA-Z][a-zA-Z0-9]*)\b")
+
+
+def _html_tag_delta(line: str, tag: str) -> int:
+    """Net open-minus-close count of `tag` on one line, ignoring self-closed
+    `<tag/>`. Used to track when a multi-line raw HTML block balances out."""
+    opens = len(re.findall(rf"<{re.escape(tag)}\b", line, re.IGNORECASE))
+    closes = len(re.findall(rf"</{re.escape(tag)}\s*>", line, re.IGNORECASE))
+    selfclose = len(re.findall(rf"<{re.escape(tag)}\b[^>]*/>", line, re.IGNORECASE))
+    return opens - closes - selfclose
+
+
 def _stdlib_markdown(body: str) -> str:
     lines = body.split("\n")
     out: list[str] = []
@@ -183,6 +204,10 @@ def _stdlib_markdown(body: str) -> str:
     para_buf: list[str] = []
     in_list = False
     list_tag = "ul"
+    in_html_block = False
+    html_block_tag = ""
+    html_depth = 0
+    html_buf: list[str] = []
 
     def flush_para():
         if para_buf:
@@ -199,6 +224,16 @@ def _stdlib_markdown(body: str) -> str:
 
     for line in lines:
         stripped = line.rstrip()
+        # Raw HTML block passthrough: while inside a block-level HTML element
+        # (svg/figure/...), copy lines verbatim until the element balances.
+        if in_html_block:
+            html_buf.append(line)
+            html_depth += _html_tag_delta(line, html_block_tag)
+            if html_depth <= 0:
+                out.append("\n".join(html_buf))
+                html_buf.clear()
+                in_html_block = False
+            continue
         if stripped.startswith("```"):
             if in_code:
                 out.append("<pre><code>" + html_lib.escape("\n".join(code_buf)) + "</code></pre>")
@@ -215,6 +250,21 @@ def _stdlib_markdown(body: str) -> str:
         if not stripped:
             flush_para()
             flush_list()
+            continue
+        m_html = _HTML_BLOCK_OPEN.match(stripped)
+        if m_html and m_html.group(1).lower() in _HTML_BLOCK_TAGS:
+            flush_para()
+            flush_list()
+            tag = m_html.group(1).lower()
+            delta = _html_tag_delta(line, tag)
+            if delta <= 0:
+                # Opens and closes on the same line: emit verbatim.
+                out.append(line.rstrip())
+            else:
+                in_html_block = True
+                html_block_tag = tag
+                html_depth = delta
+                html_buf = [line]
             continue
         h = re.match(r"^(#{1,6})\s+(.+)$", stripped)
         if h:
@@ -251,6 +301,8 @@ def _stdlib_markdown(body: str) -> str:
 
     flush_para()
     flush_list()
+    if html_buf:  # unbalanced raw HTML block at EOF: emit what we have
+        out.append("\n".join(html_buf))
     return "\n".join(out)
 
 
