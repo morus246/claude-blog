@@ -98,3 +98,13 @@ definitive-resesarch-blueprint-for-claude-blog.md
 
 # Session-scoped audit evidence at repo root (regenerated per audit cycle)
 /audit-results.md
+
+# Blog Delivery Contract artifacts inside draft folders (regenerated per run).
+# Only the source .md is versioned; renders, QA scorecards, and the iteration
+# counter are transient build outputs.
+content/**/*.html
+content/**/review.md
+content/**/.iteration-count
+content/**/.review-nonce
+content/**/preflight-report.json
+content/**/preview/
