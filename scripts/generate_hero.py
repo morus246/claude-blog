@@ -7,11 +7,10 @@ handles steps 2-4 and produces the final `hero.<ext>` + `hero-credit.txt`
 in the requested output directory.
 
 Ladder:
-  1. (Orchestrator only) Banana MCP via nanobanana-mcp
-  2. Direct Gemini API via google-genai SDK (requires GOOGLE_AI_API_KEY)
-  3. Premium stock APIs: Unsplash, Pexels, Pixabay (any one key suffices)
-  4. Openverse public API (CC-licensed; no key required)
-  5. Exit nonzero with setup instructions
+  1. MiniMax mmx CLI (requires mmx in PATH + MINIMAX_API_KEY in ~/.mmx/config.json)
+  2. Unsplash API (requires UNSPLASH_ACCESS_KEY)
+  3. Openverse public API (CC-licensed; no key required)
+  4. Exit nonzero with setup instructions
 
 Usage:
     python3 scripts/generate_hero.py --topic "<title>" --tags "a,b,c" \\
@@ -27,7 +26,9 @@ import argparse
 import ipaddress
 import json
 import os
+import shutil
 import socket
+import subprocess
 import sys
 import tempfile
 import urllib.parse
@@ -38,11 +39,8 @@ from typing import Callable, Optional
 OUTPUT_FILE_PREFIX = "hero"
 DEFAULT_WIDTH = 1200
 DEFAULT_HEIGHT = 630
-DEFAULT_GEMINI_MODEL = os.environ.get("NANOBANANA_MODEL", "gemini-3.1-flash-image-preview")
 OPENVERSE_API = "https://api.openverse.engineering/v1/images/"
 UNSPLASH_API = "https://api.unsplash.com/search/photos"
-PEXELS_API = "https://api.pexels.com/v1/search"
-PIXABAY_API = "https://pixabay.com/api/"
 USER_AGENT = "claude-blog/1.9.0 (+https://github.com/AgriciDaniel/claude-blog)"
 HTTP_TIMEOUT = 20
 
@@ -214,73 +212,6 @@ def _http_get_json(url: str, headers: Optional[dict] = None) -> Optional[dict]:
         return None
 
 
-def _try_gemini(topic: str, tags: list[str], out_dir: Path, width: int, height: int, model: str) -> Optional[dict]:
-    """Ladder step 2: direct Gemini API."""
-    api_key = os.environ.get("GOOGLE_AI_API_KEY")
-    if not api_key:
-        return None
-    try:
-        from google import genai  # type: ignore
-    except ImportError:
-        print("[gemini] google-genai not installed; skipping", file=sys.stderr)
-        return None
-
-    prompt = _build_prompt(topic, tags)
-    client = genai.Client(api_key=api_key)
-    img_bytes: Optional[bytes] = None
-    used_model = model
-
-    # Try Gemini image-preview models first (via generate_content)
-    for try_model in (model, "gemini-3.1-flash-image-preview", "gemini-2.5-flash-image"):
-        try:
-            response = client.models.generate_content(model=try_model, contents=prompt)
-            cands = getattr(response, "candidates", None) or []
-            for cand in cands:
-                content = getattr(cand, "content", None)
-                if not content:
-                    continue
-                for part in getattr(content, "parts", []) or []:
-                    inline = getattr(part, "inline_data", None)
-                    if inline and getattr(inline, "data", None):
-                        img_bytes = inline.data
-                        used_model = try_model
-                        break
-                if img_bytes:
-                    break
-            if img_bytes:
-                break
-        except Exception as e:
-            print(f"[gemini] {try_model} generate_content failed: {e}", file=sys.stderr)
-
-    # Fall back to Imagen via generate_images
-    if not img_bytes:
-        for try_model in ("imagen-4.0-fast-generate-001", "imagen-4.0-generate-001"):
-            try:
-                response = client.models.generate_images(
-                    model=try_model, prompt=prompt,
-                    config={"number_of_images": 1, "aspect_ratio": "16:9"},
-                )
-                imgs = getattr(response, "generated_images", None) or []
-                if imgs:
-                    img_obj = imgs[0].image
-                    img_bytes = getattr(img_obj, "image_bytes", None) or img_obj.read()
-                    used_model = try_model
-                    break
-            except Exception as e:
-                print(f"[gemini] {try_model} generate_images failed: {e}", file=sys.stderr)
-
-    if not img_bytes:
-        return None
-
-    hero_path = out_dir / f"{OUTPUT_FILE_PREFIX}.png"
-    _atomic_write_bytes(hero_path, img_bytes)
-    (out_dir / "hero-credit.txt").write_text(
-        f"AI-generated via {used_model}. No attribution required.\nPrompt: {prompt}\n",
-        encoding="utf-8",
-    )
-    return {"source": "gemini", "model": used_model, "path": str(hero_path)}
-
-
 def _try_unsplash(query: str, out_dir: Path) -> Optional[dict]:
     key = os.environ.get("UNSPLASH_ACCESS_KEY")
     if not key:
@@ -310,69 +241,67 @@ def _try_unsplash(query: str, out_dir: Path) -> Optional[dict]:
     return {"source": "unsplash", "path": str(hero_path)}
 
 
-def _try_pexels(query: str, out_dir: Path) -> Optional[dict]:
-    key = os.environ.get("PEXELS_API_KEY")
-    if not key:
+def _try_mmx(topic: str, tags: list[str], out_dir: Path) -> Optional[dict]:
+    """Ladder step 1: MiniMax mmx CLI image generation."""
+    if not shutil.which("mmx"):
+        print("[mmx] not found in PATH; skipping", file=sys.stderr)
         return None
-    params = urllib.parse.urlencode({"query": query, "orientation": "landscape", "per_page": 10})
-    data = _http_get_json(f"{PEXELS_API}?{params}", headers={"Authorization": key})
-    if not data or not data.get("photos"):
+
+    # Quota pre-check — fail-open: if parsing fails, proceed
+    try:
+        quota_res = subprocess.run(
+            ["mmx", "quota", "show", "--output", "json", "--quiet"],
+            capture_output=True, text=True, timeout=15,
+        )
+        if quota_res.returncode == 0:
+            quota_data = json.loads(quota_res.stdout)
+            remaining = quota_data.get("remaining", 1)
+            if isinstance(remaining, (int, float)) and remaining < 1:
+                print("[mmx] quota exhausted; skipping", file=sys.stderr)
+                return None
+    except Exception as e:
+        print(f"[mmx] quota check error: {e}; proceeding", file=sys.stderr)
+
+    prompt = _build_prompt(topic, tags)
+    raw_dir = out_dir / "raw"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        gen_res = subprocess.run(
+            [
+                "mmx", "image", "generate",
+                "--prompt", prompt,
+                "--aspect-ratio", "16:9",
+                "--out-dir", str(raw_dir),
+                "--out-prefix", "hero",
+                "--quiet",
+                "--non-interactive",
+            ],
+            capture_output=True, text=True, timeout=120,
+        )
+    except Exception as e:
+        print(f"[mmx] generation exception: {e}", file=sys.stderr)
         return None
-    item = data["photos"][0]
-    img_url = item.get("src", {}).get("large2x") or item.get("src", {}).get("large")
-    if not img_url:
+
+    if gen_res.returncode != 0:
+        print(f"[mmx] exit {gen_res.returncode}: {gen_res.stderr[:200]}", file=sys.stderr)
         return None
-    img_bytes = _http_get(img_url)
-    if not img_bytes:
-        return None
-    hero_path = out_dir / f"{OUTPUT_FILE_PREFIX}.jpg"
-    _atomic_write_bytes(hero_path, img_bytes)
-    credit = (
-        f'Photo by {item.get("photographer", "Pexels contributor")} on Pexels\n'
-        f'License: Pexels License (free for commercial use)\n'
-        f'Source: {item.get("url", img_url)}\n'
+
+    generated = raw_dir / "hero_001.jpg"
+    if not generated.exists():
+        candidates = sorted(raw_dir.glob("hero_*.jpg"))
+        if not candidates:
+            print("[mmx] hero_001.jpg not found in raw/; skipping", file=sys.stderr)
+            return None
+        generated = candidates[0]
+
+    hero_path = out_dir / "hero.jpg"
+    generated.rename(hero_path)
+    (out_dir / "hero-credit.txt").write_text(
+        f"AI-generated via MiniMax mmx (image-01).\nNo attribution required.\nPrompt: {prompt}\n",
+        encoding="utf-8",
     )
-    (out_dir / "hero-credit.txt").write_text(credit, encoding="utf-8")
-    return {"source": "pexels", "path": str(hero_path)}
-
-
-def _try_pixabay(query: str, out_dir: Path) -> Optional[dict]:
-    key = os.environ.get("PIXABAY_API_KEY")
-    if not key:
-        return None
-    params = urllib.parse.urlencode({
-        "key": key, "q": query, "orientation": "horizontal",
-        "image_type": "photo", "safesearch": "true", "per_page": 10,
-    })
-    data = _http_get_json(f"{PIXABAY_API}?{params}")
-    if not data or not data.get("hits"):
-        return None
-    item = data["hits"][0]
-    img_url = item.get("largeImageURL") or item.get("webformatURL")
-    if not img_url:
-        return None
-    img_bytes = _http_get(img_url)
-    if not img_bytes:
-        return None
-    hero_path = out_dir / f"{OUTPUT_FILE_PREFIX}.jpg"
-    _atomic_write_bytes(hero_path, img_bytes)
-    credit = (
-        f'Image by {item.get("user", "Pixabay contributor")} on Pixabay\n'
-        f'License: Pixabay Content License (free for commercial use)\n'
-        f'Source: {item.get("pageURL", img_url)}\n'
-    )
-    (out_dir / "hero-credit.txt").write_text(credit, encoding="utf-8")
-    return {"source": "pixabay", "path": str(hero_path)}
-
-
-def _try_premium_stock(topic: str, tags: list[str], out_dir: Path) -> Optional[dict]:
-    """Ladder step 3: Unsplash > Pexels > Pixabay (first whose key is set)."""
-    query = " ".join([topic] + tags[:3])
-    for fn in (_try_unsplash, _try_pexels, _try_pixabay):
-        result = fn(query, out_dir)
-        if result:
-            return result
-    return None
+    return {"source": "mmx", "path": str(hero_path)}
 
 
 def _try_openverse(topic: str, tags: list[str], out_dir: Path) -> Optional[dict]:
@@ -420,7 +349,6 @@ def main() -> int:
     parser.add_argument("--out", required=True, help="Output directory (will receive hero.<ext> and hero-credit.txt)")
     parser.add_argument("--width", type=int, default=DEFAULT_WIDTH)
     parser.add_argument("--height", type=int, default=DEFAULT_HEIGHT)
-    parser.add_argument("--model", default=DEFAULT_GEMINI_MODEL, help="Gemini image model name")
     parser.add_argument("--json", action="store_true", help="Emit JSON result to stdout")
     args = parser.parse_args()
 
@@ -444,8 +372,8 @@ def main() -> int:
     tags = [t.strip() for t in args.tags.split(",") if t.strip()]
 
     ladder: list[tuple[str, Callable[[], Optional[dict]]]] = [
-        ("gemini", lambda: _try_gemini(args.topic, tags, out_dir, args.width, args.height, args.model)),
-        ("premium-stock", lambda: _try_premium_stock(args.topic, tags, out_dir)),
+        ("mmx", lambda: _try_mmx(args.topic, tags, out_dir)),
+        ("unsplash", lambda: _try_unsplash(" ".join([args.topic] + tags[:3]), out_dir)),
         ("openverse", lambda: _try_openverse(args.topic, tags, out_dir)),
     ]
 
@@ -461,9 +389,8 @@ def main() -> int:
     err = {
         "error": "no-image-gen-path",
         "message": (
-            "Hero image required but no generation path available. Configure Banana MCP, "
-            "set GOOGLE_AI_API_KEY, set UNSPLASH_ACCESS_KEY / PEXELS_API_KEY / PIXABAY_API_KEY, "
-            "or place a 1200x630 hero.png in the draft folder manually."
+            "Hero image required but no generation path available. Install mmx and authenticate "
+            "(`mmx auth status`), set UNSPLASH_ACCESS_KEY, or place hero.jpg in the draft folder manually."
         ),
     }
     if args.json:
