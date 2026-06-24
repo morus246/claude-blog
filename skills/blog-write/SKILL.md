@@ -538,6 +538,52 @@ requiring an explicit `/blog translate` command.
 The translation runs AFTER delivery contract gates pass. A blocked draft never
 triggers translation.
 
+### Phase 6.7: Auto-Localize (en-US)
+
+Runs automatically after Phase 6.6 produces `translations/en/<slug>.md`. Applies
+cultural deep-adaptation so the EN version reads as native US English, not translated
+Portuguese.
+
+**Skip conditions (silent):**
+- Phase 6.6 was skipped (no EN file produced)
+- User passed `--no-localize` flag
+
+**Steps (inline, follows `skills/blog-localize/SKILL.md` Phases 1–5):**
+1. Parse locale `en-US`; build a minimal custom-locale profile (en-US is not in
+   `cultural-adaptation.md`): informal address, imperative CTAs, USD currency,
+   NIMH/ADAA/NAMI as preferred statistics sources, US legal references (ADA, FTC, HIPAA)
+2. Audit the EN file for foreign-origin markers:
+   - Statistics scoped to Brazil or other non-US regions
+   - "Professional support" links pointing to BR/PT services
+   - Any idioms that are literal translations rather than natural US English
+3. Apply adaptations:
+   - Replace Brazil-scoped stats with US equivalents from NIMH, ADAA, or NAMI where
+     a direct US figure exists; otherwise scope the original stat explicitly ("In Brazil...")
+   - Replace or supplement any professional-help links with generic or US-appropriate
+     resources (e.g., SAMHSA National Helpline mention where contextually appropriate)
+   - Confirm CTAs are imperative and direct (US norm): "Reach out", "Book a session",
+     "Get help" — not softened or passive
+   - Fix any idioms that read as translated rather than native
+4. Save in place — overwrite `translations/en/<slug>.md`
+5. Produce cultural-fit score: naturalness [1–10] / market relevance [1–10] / tone [1–10]
+
+### Phase 6.8: Auto Locale-Audit
+
+Runs after Phase 6.7. Non-blocking: issues are reported but do not stop delivery.
+
+**Skip conditions (silent):**
+- User passed `--no-locale-audit`
+- `translations/` directory contains only one language subdirectory
+
+**Steps (inline, follows `skills/blog-locale-audit/SKILL.md` Phases 1–7):**
+1. Discover all language subdirectories under `translations/`
+2. Check completeness matrix: does the current post's slug exist in every language found?
+3. Content parity on the current post: H2/H3 count, FAQ items, SVG charts, word-count
+   ratio (target: 85–115% of source)
+4. SEO parity: `title`, `description`, `canonical` present in each translation's frontmatter
+5. Emit a prioritised report (critical / recommended) — never block delivery
+6. Add 3–5 line audit summary to the Phase 7 delivery summary
+
 ### Phase 7: Delivery
 
 Present the completed article ONLY after Phase 6.5 returns all gates passing. Include the screenshots from `<folder>/preview/*.png` in the summary so the user can see what they are getting before reading the prose.
@@ -577,6 +623,16 @@ Summary template:
 - AI phrase scan: [pass/fail]
 - Contractions used: [yes/no]
 - Rhetorical questions: [N] (target: 1 per 200-300 words)
+
+### Localization (en-US)
+- Naturalness: [N]/10 | Market relevance: [N]/10 | Tone: [N]/10
+- Adaptations: [N stats], [N CTAs], [N idioms/links]
+- File: `translations/en/[slug].md`
+
+### Locale Audit
+- Languages found: [N] ([list])
+- [slug] coverage: [✓ en | ✗ es | ...]
+- Issues: [N critical | N recommended]
 
 ### Next Steps
 - Review and customize for your brand voice
