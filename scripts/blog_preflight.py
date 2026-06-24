@@ -576,11 +576,21 @@ def gate_5_asset_link_integrity(draft_dir: Path) -> dict:
             if diff_pct > 5:
                 violations.append(f"JSON-LD wordCount {declared_word_count} differs from actual {actual} by {diff_pct:.1f}%")
 
+    # lazy loading audit (warn only; blog_hygiene.py auto-fixes these before Gate 3)
+    all_img_tags = re.findall(r"<img\b[^>]*>", raw, re.IGNORECASE | re.DOTALL)
+    imgs_without_lazy = [t for t in all_img_tags if not re.search(r"\bloading=", t, re.IGNORECASE)]
+    if imgs_without_lazy:
+        warnings.append(
+            f"{len(imgs_without_lazy)} <img> tag(s) missing loading attribute"
+            "; run: python3 scripts/blog_hygiene.py to auto-fix"
+        )
+
     return _gate_result(
         5, "Asset + Link Integrity", not violations, violations, warnings,
         imgs=parser.imgs, links_checked=len(parser.links),
         json_ld_valid=json_ld_ok, declared_word_count=declared_word_count,
         actual_word_count=parser.article_text_chars,
+        imgs_without_lazy=len(imgs_without_lazy),
     )
 
 

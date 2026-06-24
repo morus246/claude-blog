@@ -507,11 +507,13 @@ Steps:
 
 2. **Format completeness**: render the canonical `.md` to `.html` and `.pdf` via `python scripts/blog_render.py --md <slug>.md --out-dir <folder>`. All three artifacts plus `hero.<ext>` must end up in the draft folder.
 
+2b. **Structural hygiene**: run `python scripts/blog_hygiene.py --md <slug>.md --html <folder>/<slug>.html` immediately after render. This auto-applies deterministic fixes (lazy loading on images, TOC insertion for posts >2000 words) before the visual review sees the HTML. Exit 0 always; check JSON output for `warnings`.
+
 3. **Content review (blocking)**: dispatch the `blog-reviewer` agent (Task tool) against the rendered `.html`. The agent emits its scorecard to `<folder>/review.md` ending with `BLOCKING: true|false (reason)`. Threshold: overall score 90/100 or higher AND zero P0 issues per `editorial-heuristics.md`.
 
 4. **Visual + asset gates**: run `python scripts/blog_preflight.py --draft <folder> --strict`. This runs Gate 3 (visual verification via patchright at 3 viewport widths), Gate 4 (reads review.md BLOCKING line), and Gate 5 (asset + link integrity). Exit 0 = ship; exit 1 = block.
 
-5. **Iteration**: on any block, capture the failure diagnostic from `<folder>/preflight-report.json`, re-dispatch the blog-writer agent with the diagnostic as input, and re-run from step 1. Maximum 3 iterations. On the 3rd failure, STOP and present the failure diagnostic instead of the draft.
+5. **Iteration**: on any block, capture the failure diagnostic from `<folder>/preflight-report.json` and read all P0 and P1 issues from `<folder>/review.md`. Re-dispatch the blog-writer agent with: (a) gate failure diagnostic, (b) full P0 list (must fix), (c) full P1 list (must fix in this iteration; do not defer). Include this instruction in the re-dispatch prompt: "P1 issues must be resolved now, not deferred to a pre-publication checklist. Specifically: convert H2 statements to questions where natural (60-70% target); add an inline source for any named clinical technique; ensure descriptive alt text on all images." Re-run from step 1. Maximum 3 iterations. On the 3rd failure, STOP and present the failure diagnostic instead of the draft.
 
 The orchestrator holds the loop counter; this sub-skill never loops itself.
 

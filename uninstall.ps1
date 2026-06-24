@@ -46,9 +46,10 @@ function Main {
     # Remove root-level scripts copied to ~/.claude/scripts/ by install.ps1
     # (v1.8.6: install.ps1 now copies all scripts/*.py to that location).
     $ClaudeScriptsDir = Join-Path $env:USERPROFILE ".claude\scripts"
-    $helperScripts = @("analyze_blog.py", "blog_preflight.py", "blog_render.py",
-                        "cognitive_load.py", "discourse_research.py", "generate_hero.py",
-                        "load_untrusted_root.py", "lint_prose.py", "sync_flow.py")
+    $helperScripts = @("analyze_blog.py", "blog_hygiene.py", "blog_preflight.py",
+                        "blog_render.py", "cognitive_load.py", "discourse_research.py",
+                        "generate_hero.py", "load_untrusted_root.py", "lint_prose.py",
+                        "sync_flow.py")
     foreach ($s in $helperScripts) {
         $scriptPath = Join-Path $ClaudeScriptsDir $s
         if (Test-Path $scriptPath) {

@@ -199,6 +199,7 @@ Set `BLOCKING: true` if ANY of the following hold:
 - Burstiness score in the Flagged range (too uniform sentence length)
 - More than 3 known AI phrases detected
 - Vocabulary diversity (TTR) below 0.4
+- **YMYL Clinical Technique Attribution (P0):** Any technique or protocol attributed to a named clinical framework (DBT, EMDR, CBT, TIPP, EFT, ACT, somatic experiencing, etc.) appears without at least one inline source citation. Health YMYL content cannot ship with unverified clinical technique attribution regardless of overall score.
 
 Set `BLOCKING: false` only when none of those conditions hold. The reason field is the single most important sentence on the line; it tells the orchestrator what to fix in the next iteration. Examples:
 
