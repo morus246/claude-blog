@@ -97,7 +97,7 @@ Muita gente confunde o ataque de pânico com infarto, derrame ou morte iminente.
 
 A respiração é a ferramenta mais poderosa que você tem acesso durante uma crise, porque é a única função autônoma do corpo que você pode controlar conscientemente. Em 2023, uma revisão sistemática publicada na *PMC* analisou **72 ensaios clínicos** sobre intervenções de respiração e encontrou eficácia em **75% dos estudos**. Em populações clínicas de alta ansiedade, a eficácia subiu para **100%** (4 de 4 ensaios) ([Hopper et al., PMC, Dez 2023](https://pmc.ncbi.nlm.nih.gov/articles/PMC10741869/)).
 
-A técnica 4-7-8 é especialmente eficaz porque a expiração mais longa que a inspiração é o mecanismo central, não a contagem em si. [UNIQUE INSIGHT] A maioria dos materiais sobre respiração foca nos números, mas o que realmente ativa o nervo vago é a proporção: expirar mais devagar do que inspirou. Você pode adaptar para 4-6, 4-8 ou qualquer combinação onde o tempo de expirar supera o de inspirar.
+A técnica 4-7-8 é especialmente eficaz porque a expiração mais longa que a inspiração é o mecanismo central, não a contagem em si. [UNIQUE INSIGHT] A maioria dos materiais sobre respiração foca nos números, mas o que realmente ativa o [nervo vago](https://fabiomorus.com/blog/6-exercícios-do-nervo-vago-para-acalmar-a-ansiedade) é a proporção: expirar mais devagar do que inspirou. Você pode adaptar para 4-6, 4-8 ou qualquer combinação onde o tempo de expirar supera o de inspirar.
 
 **Como fazer:**
 
@@ -234,11 +234,11 @@ Saber o que não fazer é tão importante quanto saber o que fazer. Alguns compo
 
 ## Quando Procurar Ajuda Profissional
 
-Estas técnicas são ferramentas de interrupção aguda, não substitutos para tratamento. Você deve considerar acompanhamento profissional quando os ataques ocorrem semanalmente, quando você está evitando lugares ou situações por medo, ou quando a qualidade de vida está comprometida.
+Estas técnicas são ferramentas de interrupção aguda, não substitutos para tratamento. Você deve considerar [acompanhamento profissional](https://fabiomorus.com/servicos/ansiedade) quando os ataques ocorrem semanalmente, quando você está evitando lugares ou situações por medo, ou quando a qualidade de vida está comprometida.
 
 A Terapia Cognitivo-Comportamental (TCC) é o padrão-ouro para transtorno de pânico. Meta-análise de rede publicada na *PMC* em 2023, com **74 ensaios clínicos e 6.699 participantes**, encontrou tamanho de efeito significativo versus tratamento usual (SMD -0,43 a -0,47), confirmando que a TCC reduz ataques de pânico de forma sustentável ([Parry et al., PMC, Fev 2023](https://pmc.ncbi.nlm.nih.gov/articles/PMC9975966/)).
 
-Se você se identifica com esse padrão, entre em contato para uma consulta. O trabalho terapêutico vai além das técnicas de autoajuda: ajuda a identificar os gatilhos, reformular crenças catastróficas e construir tolerância ao desconforto de forma estruturada.
+Se você se identifica com esse padrão, [entre em contato](https://fabiomorus.com/contato/) para uma consulta. O trabalho terapêutico vai além das técnicas de autoajuda: ajuda a identificar os gatilhos, reformular crenças catastróficas e construir tolerância ao desconforto de forma estruturada.
 
 
 ---
@@ -272,7 +272,7 @@ O tratamento mais eficaz a longo prazo é a TCC, com eficácia confirmada em met
 
 Você tem agora 5 ferramentas concretas nas suas mãos: nomeação sem julgamento, respiração 4-7-8, reflexo de mergulho, grounding 5-4-3-2-1 e box breathing. Nenhuma delas elimina o desconforto na hora, mas todas interrompem o ciclo de escalada que transforma um episódio de 3 minutos em uma crise de meia hora. Lembre: o pânico atinge o pico em 10 minutos. Você é capaz de atravessar esses 10 minutos.
 
-Se os ataques são frequentes, se você está evitando lugares ou se a qualidade de vida está comprometida, é hora de ir além das técnicas de autoajuda. A terapia existe exatamente para isso.
+Se os ataques são frequentes, se você está evitando lugares ou se a qualidade de vida está comprometida, é hora de ir além das técnicas de autoajuda. [A terapia](https://fabiomorus.com/servicos/ansiedade) existe exatamente para isso.
 
 
 ---
@@ -292,4 +292,4 @@ Se os ataques são frequentes, se você está evitando lugares ou se a qualidade
 
 ## Sobre o Autor
 
-**Fábio Morus** é terapeuta clínico especializado em Transtorno Neurológico Funcional (TNF), ansiedade e perturbações de pânico. Atua com Terapia Cognitivo-Comportamental (TCC), EMDR e hipnoterapia clínica, com consultas presenciais em Jersey (Channel Islands) e online para clientes em Portugal e Brasil. Para marcar consulta: [fabiomorus.com](https://fabiomorus.com).
+**Fábio Morus** é terapeuta clínico especializado em Transtorno Neurológico Funcional (TNF), ansiedade e perturbações de pânico. Atua com Terapia Cognitivo-Comportamental (TCC), EMDR e hipnoterapia clínica, com consultas presenciais em Jersey (Channel Islands) e online para clientes em Portugal e Brasil. Para marcar consulta: [fabiomorus.com/contato](https://fabiomorus.com/contato/).
