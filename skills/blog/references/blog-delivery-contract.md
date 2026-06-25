@@ -133,7 +133,7 @@ The orchestrator holds the loop counter. Sub-skills never loop themselves; that 
 
 ## Bypass Mechanism
 
-Strict mode is the default. Users can override via the `--no-strict` flag on `scripts/blog_preflight.py` or the `bypass: true` field in the draft frontmatter. Both routes log the bypass loudly:
+Strict mode is the default. Users can override via the `--no-strict` flag on `scripts/blog_preflight.py`. The bypass is logged loudly:
 
 ```
 WARNING: Delivery contract bypassed. Failed gates: [Gate 3, Gate 5].
