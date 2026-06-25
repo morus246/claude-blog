@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Blog Delivery Contract quick-wins (2026-06-25)
+
+Static audit of the Blog Delivery Contract (`skills/blog/references/blog-delivery-contract.md` + `scripts/blog_preflight.py` + `agents/blog-reviewer.md`) produced 11 findings; this release closes the 4 low-risk quick wins. See `docs/superpowers/specs/2026-06-25-blog-delivery-contract-audit-report.md`.
+
+**Fixed**
+
+- `scripts/blog_preflight.py`: `_is_allowed_unreachable` now matches the parsed hostname for exact equality instead of substring, so lookalike hosts (`example.com.evil.com`) no longer skip the Gate 5 HEAD check. Closes **FIND-03**.
+- `scripts/blog_preflight.py`: the `--no-strict` bypass warning now fires to stderr under `--json` too (previously only in the human-readable branch). Closes **FIND-10**.
+- `skills/blog/references/blog-delivery-contract.md`: removed the unimplemented `bypass: true` frontmatter claim (FIND-04); unified the Gate 5 name in the summary table (FIND-11).
+
+**Added**
+
+- `tests/test_url_allowlist.py`: 13 parametrized cases pinning exact-hostname semantics.
+- `tests/test_blog_delivery_contract.py`: 1 case asserting the `--no-strict` warning under `--json`.
+
 ### Image generation: nanobanana-mcp setup documented, ladder contract pinned
 
 Wired up the `nanobanana-mcp` tier of the Blog Delivery Contract hero-image ladder so `/blog image`, `blog-write`, and `blog-rewrite` can produce AI-generated heroes end-to-end. Pinned the ladder's documented 4-step fallback order (`mmx` -> `unsplash` -> `openverse` -> fail) with a regression test so the no-key Openverse path stays intact.
