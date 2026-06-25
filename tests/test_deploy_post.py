@@ -109,6 +109,15 @@ class TestNormalizePTFrontmatter:
         result = self._run(deploy_module, "title: T\nauthor: Fábio Morus\n")
         assert 'author: "Fabio Morus"' in result
 
+    def test_author_uses_param_value(self, deploy_module):
+        """When an author param is passed, it overrides whatever the frontmatter says."""
+        result = deploy_module._normalize_pt_frontmatter(
+            "title: T\nauthor: Whoever\n", slug=self.SLUG, en_slug=None,
+            category=None, hero_url=self.HERO, author="Jane Doe",
+        )
+        assert 'author: "Jane Doe"' in result
+        assert "Whoever" not in result
+
     def test_lang_ptbr_injected(self, deploy_module):
         result = self._run(deploy_module, "title: T\n")
         assert 'lang: "pt-BR"' in result
@@ -181,6 +190,14 @@ class TestNormalizeENFrontmatter:
         result = self._run(deploy_module, "title: T\n")
         assert 'lang: "en"' in result
 
+    def test_author_uses_param_value(self, deploy_module):
+        """EN frontmatter also honors the author param (from config)."""
+        result = deploy_module._normalize_en_frontmatter(
+            "title: T\nauthor: Whoever\n", slug="meu-post", en_slug="my-post",
+            category=None, hero_url=self.HERO, author="Jane Doe",
+        )
+        assert 'author: "Jane Doe"' in result
+
 
 # ---- _find_canonical_md ----
 
@@ -204,6 +221,16 @@ class TestFindCanonicalMd:
     def test_exits_1_when_no_md(self, deploy_module, tmp_path):
         draft = tmp_path / "empty-post"
         draft.mkdir()
+        with pytest.raises(SystemExit) as exc:
+            deploy_module._find_canonical_md(draft)
+        assert exc.value.code == 1
+
+    def test_fails_when_multiple_ambiguous_md(self, deploy_module, tmp_path):
+        """Multiple .md with none matching the folder slug = ambiguous -> fail, don't guess."""
+        draft = tmp_path / "the-post"
+        draft.mkdir()
+        (draft / "one.md").write_text("---\ntitle: One\n---\nBody\n", encoding="utf-8")
+        (draft / "two.md").write_text("---\ntitle: Two\n---\nBody\n", encoding="utf-8")
         with pytest.raises(SystemExit) as exc:
             deploy_module._find_canonical_md(draft)
         assert exc.value.code == 1
@@ -242,6 +269,96 @@ class TestFindHero:
         captured = capsys.readouterr()
         assert "hero" in captured.err.lower()
         assert "Phase 6.5" in captured.err
+
+
+# ---- _to_webp ----
+
+class TestToWebp:
+    def test_fallback_without_pil_warns_loudly(self, deploy_module, tmp_path, monkeypatch, capsys):
+        """When PIL is unavailable, raw copy MUST happen AND a warning MUST hit stderr."""
+        import sys as _sys
+        # Force `from PIL import Image` to raise ImportError.
+        monkeypatch.setitem(_sys.modules, "PIL", None)
+        src = tmp_path / "hero.jpg"
+        src.write_bytes(b"\xff\xd8\xff\xe0raw-jpeg-bytes")
+        dest = tmp_path / "hero.webp"
+
+        deploy_module._to_webp(src, dest)
+
+        assert dest.exists(), "raw copy must still happen on fallback"
+        captured = capsys.readouterr()
+        msg = captured.err.lower()
+        assert "pil" in msg or "webp" in msg, (
+            f"fallback must warn to stderr; got: {captured.err!r}"
+        )
+
+
+# ---- _validate_slug ----
+
+class TestValidateSlug:
+    @pytest.mark.parametrize("slug", [
+        "meu-post", "10-dicas", "a", "abc123", "psicologia-online", "ansiedade"
+    ])
+    def test_valid_slugs_accepted(self, deploy_module, slug):
+        # Must not raise.
+        deploy_module._validate_slug(slug)
+
+    @pytest.mark.parametrize("slug", [
+        "Meu-Post",          # uppercase
+        "meu_post",          # underscore
+        "meu post",          # space
+        "meu-post-",         # trailing hyphen
+        "-meu",              # leading hyphen
+        "caf\u00e9",         # accent (café)
+        "m\u00fasica",       # accent (música)
+        "a.b",               # dot
+        "",                  # empty
+        "post!",             # punctuation
+    ])
+    def test_invalid_slugs_rejected(self, deploy_module, slug):
+        with pytest.raises(SystemExit) as exc:
+            deploy_module._validate_slug(slug)
+        assert exc.value.code == 1
+
+
+# ---- config helpers ----
+
+class TestConfigAuthor:
+    def test_uses_config_default_author(self, deploy_module):
+        assert deploy_module._config_author({"default_author": "Jane Doe"}) == "Jane Doe"
+
+    def test_defaults_to_fabio_morus(self, deploy_module):
+        assert deploy_module._config_author({}) == "Fabio Morus"
+
+
+class TestConfigSiteUrl:
+    def test_uses_config_site_url(self, deploy_module):
+        assert deploy_module._config_site_url({"site_url": "https://example.com"}) == "https://example.com"
+
+    def test_strips_trailing_slash(self, deploy_module):
+        assert deploy_module._config_site_url({"site_url": "https://example.com/"}) == "https://example.com"
+
+    def test_defaults_to_fabiomorus(self, deploy_module):
+        assert deploy_module._config_site_url({}) == "https://fabiomorus.com"
+
+
+class TestResolveSite:
+    def test_absolute_path_returned_as_is(self, deploy_module, tmp_path):
+        abs_path = tmp_path / "site"
+        abs_path.mkdir()
+        assert deploy_module._resolve_site({"site": str(abs_path)}, tmp_path) == abs_path.resolve()
+
+    def test_relative_path_resolved_against_repo_root(self, deploy_module, tmp_path):
+        (tmp_path / "relative-site").mkdir()
+        result = deploy_module._resolve_site({"site": "relative-site"}, tmp_path)
+        assert result == (tmp_path / "relative-site").resolve()
+
+    def test_env_override_takes_precedence(self, deploy_module, tmp_path, monkeypatch):
+        env_site = tmp_path / "env-site"
+        env_site.mkdir()
+        monkeypatch.setenv("CLAUDE_BLOG_SITE", str(env_site))
+        # config.site points elsewhere; env must win
+        assert deploy_module._resolve_site({"site": "relative-site"}, tmp_path) == env_site.resolve()
 
 
 # ---- _load_config ----
@@ -339,6 +456,143 @@ class TestDryRun:
         data = json.loads(out.getvalue())
         assert data["status"] == "ok"
         assert "fabiomorus.com/blog/meu-post" in data["pt_url"]
+
+    def test_build_call_has_timeout(self, deploy_module, tmp_path, fake_site, monkeypatch):
+        """subprocess.run for pnpm build must be invoked with a positive timeout kwarg."""
+        draft = tmp_path / "content" / "meu-post"
+        draft.mkdir(parents=True)
+        (draft / "meu-post.md").write_text(
+            "---\ntitle: T\ncoverImage: https://x.jpg\n---\nBody\n", encoding="utf-8"
+        )
+        (draft / "hero.jpg").write_bytes(b"\xff\xd8\xff\xe0" + b"x" * 100)
+
+        seen: list[dict] = []
+
+        class _R:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        def mock_run(cmd, **kwargs):
+            if isinstance(cmd, list) and "build" in cmd:
+                seen.append(kwargs)
+            return _R()
+
+        monkeypatch.setattr(subprocess, "run", mock_run)
+        monkeypatch.setattr(
+            deploy_module, "_load_config", lambda root: {"site": str(fake_site)}
+        )
+        monkeypatch.setattr(deploy_module, "_get_repo_root", lambda: tmp_path)
+
+        sys.argv = ["deploy_post.py", "--draft", str(draft), "--dry-run"]
+        import io
+        out = io.StringIO()
+        monkeypatch.setattr(sys, "stdout", out)
+
+        rc = deploy_module.main()
+        assert rc == 0
+        assert seen, "build subprocess.run must be called"
+        assert "timeout" in seen[0], "build must pass a timeout"
+        assert seen[0]["timeout"] > 0
+
+    def test_build_timeout_rolls_back_and_fails(
+        self, deploy_module, tmp_path, fake_site, monkeypatch
+    ):
+        """If pnpm build hits TimeoutExpired, written files roll back and exit is 1."""
+        draft = tmp_path / "content" / "meu-post"
+        draft.mkdir(parents=True)
+        (draft / "meu-post.md").write_text(
+            "---\ntitle: T\ncoverImage: https://x.jpg\n---\nBody\n", encoding="utf-8"
+        )
+        (draft / "hero.jpg").write_bytes(b"\xff\xd8\xff\xe0" + b"x" * 100)
+
+        class _R:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        def mock_run(cmd, **kwargs):
+            if isinstance(cmd, list) and "build" in cmd:
+                raise subprocess.TimeoutExpired(cmd=cmd, timeout=kwargs.get("timeout", 1))
+            return _R()
+
+        monkeypatch.setattr(subprocess, "run", mock_run)
+        monkeypatch.setattr(
+            deploy_module, "_load_config", lambda root: {"site": str(fake_site)}
+        )
+        monkeypatch.setattr(deploy_module, "_get_repo_root", lambda: tmp_path)
+
+        sys.argv = ["deploy_post.py", "--draft", str(draft), "--dry-run"]
+        with pytest.raises(SystemExit) as exc:
+            deploy_module.main()
+        assert exc.value.code == 1
+        pt_dest = fake_site / "src" / "content" / "blog" / "meu-post.md"
+        assert not pt_dest.exists(), "PT file must be rolled back on build timeout"
+
+    def test_pt_url_uses_config_site_url(self, deploy_module, tmp_path, fake_site, monkeypatch):
+        """pt_url/hero in output JSON use config site_url, not hardcoded fabiomorus.com."""
+        draft = tmp_path / "content" / "meu-post"
+        draft.mkdir(parents=True)
+        (draft / "meu-post.md").write_text(
+            "---\ntitle: T\ncoverImage: https://x.jpg\n---\nBody\n", encoding="utf-8"
+        )
+        (draft / "hero.jpg").write_bytes(b"\xff\xd8\xff\xe0" + b"x" * 100)
+
+        class _R:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        monkeypatch.setattr(subprocess, "run", lambda cmd, **kw: _R())
+        monkeypatch.setattr(
+            deploy_module, "_load_config",
+            lambda root: {"site": str(fake_site), "site_url": "https://example.com"},
+        )
+        monkeypatch.setattr(deploy_module, "_get_repo_root", lambda: tmp_path)
+
+        sys.argv = ["deploy_post.py", "--draft", str(draft), "--dry-run"]
+        import io
+        out = io.StringIO()
+        monkeypatch.setattr(sys, "stdout", out)
+
+        rc = deploy_module.main()
+        assert rc == 0
+        data = json.loads(out.getvalue())
+        assert "example.com/blog/meu-post" in data["pt_url"], data
+        assert "fabiomorus.com" not in data["pt_url"], data
+        assert "example.com/blog/meu-post-hero.webp" in data["hero"], data
+
+    def test_author_flows_from_config_to_pt_file(self, deploy_module, tmp_path, fake_site, monkeypatch):
+        """config default_author is written into the deployed PT frontmatter."""
+        draft = tmp_path / "content" / "meu-post"
+        draft.mkdir(parents=True)
+        (draft / "meu-post.md").write_text(
+            "---\ntitle: T\nauthor: Whoever\ncoverImage: https://x.jpg\n---\nBody\n", encoding="utf-8"
+        )
+        (draft / "hero.jpg").write_bytes(b"\xff\xd8\xff\xe0" + b"x" * 100)
+
+        class _R:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        monkeypatch.setattr(subprocess, "run", lambda cmd, **kw: _R())
+        monkeypatch.setattr(
+            deploy_module, "_load_config",
+            lambda root: {"site": str(fake_site), "default_author": "Jane Doe"},
+        )
+        monkeypatch.setattr(deploy_module, "_get_repo_root", lambda: tmp_path)
+
+        sys.argv = ["deploy_post.py", "--draft", str(draft), "--dry-run"]
+        import io
+        out = io.StringIO()
+        monkeypatch.setattr(sys, "stdout", out)
+
+        rc = deploy_module.main()
+        assert rc == 0
+        pt_content = (fake_site / "src" / "content" / "blog" / "meu-post.md").read_text(encoding="utf-8")
+        assert 'author: "Jane Doe"' in pt_content
+        assert "Whoever" not in pt_content
 
     def test_build_failure_rolls_back_and_exits_1(
         self, deploy_module, tmp_path, fake_site, monkeypatch, capsys
@@ -482,3 +736,103 @@ class TestENDetection:
 
         data = json.loads(out.getvalue())
         assert "meu-post" in data.get("en_url", "")
+
+
+# ---- _health_check ----
+
+class TestHealthCheck:
+    def _fake_resp(self, status):
+        class _R:
+            def __init__(s): s.status = status
+            def __enter__(s): return s
+            def __exit__(s, *a): return False
+        return _R()
+
+    def test_returns_status_on_success(self, deploy_module, monkeypatch):
+        called = []
+        def fake_urlopen(req, timeout=None):
+            called.append(req.full_url)
+            return self._fake_resp(200)
+        monkeypatch.setattr(deploy_module.urllib.request, "urlopen", fake_urlopen)
+        status = deploy_module._health_check("https://example.com/x")
+        assert status == 200
+        assert len(called) == 1, "success must short-circuit (no retries)"
+
+    def test_retries_then_returns_last_status(self, deploy_module, monkeypatch):
+        calls = {"n": 0}
+        def fake_urlopen(req, timeout=None):
+            calls["n"] += 1
+            raise deploy_module.urllib.error.HTTPError(req.full_url, 500, "err", {}, None)
+        monkeypatch.setattr(deploy_module.urllib.request, "urlopen", fake_urlopen)
+        monkeypatch.setattr(deploy_module.time, "sleep", lambda s: None)
+        status = deploy_module._health_check("https://example.com/x", attempts=3, delay=0)
+        assert status == 500
+        assert calls["n"] == 3, "must retry attempts times"
+
+    def test_returns_zero_on_connection_error(self, deploy_module, monkeypatch):
+        def fake_urlopen(req, timeout=None):
+            raise deploy_module.urllib.error.URLError("no route")
+        monkeypatch.setattr(deploy_module.urllib.request, "urlopen", fake_urlopen)
+        monkeypatch.setattr(deploy_module.time, "sleep", lambda s: None)
+        status = deploy_module._health_check("https://example.com/x", attempts=2, delay=0)
+        assert status == 0
+
+
+# ---- health check integration with main() (non-dry-run) ----
+
+class TestHealthCheckDeploy:
+    def _setup_draft(self, tmp_path):
+        draft = tmp_path / "content" / "meu-post"
+        draft.mkdir(parents=True)
+        (draft / "meu-post.md").write_text(
+            "---\ntitle: T\ncoverImage: https://x.jpg\n---\nBody\n", encoding="utf-8"
+        )
+        (draft / "hero.jpg").write_bytes(b"\xff\xd8\xff\xe0" + b"x" * 100)
+        return draft
+
+    def test_success_when_health_check_ok(self, deploy_module, tmp_path, fake_site, monkeypatch):
+        """Non-dry-run deploy with healthy live site returns status=ok."""
+        draft = self._setup_draft(tmp_path)
+
+        class _R:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        monkeypatch.setattr(subprocess, "run", lambda cmd, **kw: _R())
+        monkeypatch.setattr(
+            deploy_module, "_load_config", lambda root: {"site": str(fake_site)}
+        )
+        monkeypatch.setattr(deploy_module, "_get_repo_root", lambda: tmp_path)
+        monkeypatch.setattr(deploy_module, "_health_check", lambda url, **kw: 200)
+
+        sys.argv = ["deploy_post.py", "--draft", str(draft)]  # no --dry-run
+        import io
+        out = io.StringIO()
+        monkeypatch.setattr(sys, "stdout", out)
+
+        rc = deploy_module.main()
+        assert rc == 0
+        data = json.loads(out.getvalue())
+        assert data["status"] == "ok"
+
+    def test_fails_when_health_check_broken(self, deploy_module, tmp_path, fake_site, monkeypatch):
+        """Non-dry-run deploy where live site returns 500 must exit 1 (deploy happened but site broken)."""
+        draft = self._setup_draft(tmp_path)
+
+        class _R:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        monkeypatch.setattr(subprocess, "run", lambda cmd, **kw: _R())
+        monkeypatch.setattr(
+            deploy_module, "_load_config", lambda root: {"site": str(fake_site)}
+        )
+        monkeypatch.setattr(deploy_module, "_get_repo_root", lambda: tmp_path)
+        monkeypatch.setattr(deploy_module, "_health_check", lambda url, **kw: 500)
+
+        sys.argv = ["deploy_post.py", "--draft", str(draft)]  # no --dry-run
+        with pytest.raises(SystemExit) as exc:
+            deploy_module.main()
+        assert exc.value.code == 1
