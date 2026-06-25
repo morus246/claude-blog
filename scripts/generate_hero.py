@@ -212,8 +212,32 @@ def _http_get_json(url: str, headers: Optional[dict] = None) -> Optional[dict]:
         return None
 
 
-def _try_unsplash(query: str, out_dir: Path) -> Optional[dict]:
+def _resolve_unsplash_key() -> Optional[str]:
+    """Resolve Unsplash access key from env var or .deploy.json fallback.
+
+    Order: (1) UNSPLASH_ACCESS_KEY env var; (2) unsplash_access_key field in
+    .deploy.json searched from CWD up to repo root. Returns None if not found.
+    """
     key = os.environ.get("UNSPLASH_ACCESS_KEY")
+    if key:
+        return key
+    cwd = Path.cwd()
+    for candidate in [cwd, *cwd.parents]:
+        deploy_json = candidate / ".deploy.json"
+        if deploy_json.exists():
+            try:
+                data = json.loads(deploy_json.read_text(encoding="utf-8"))
+                found = data.get("unsplash_access_key")
+                if found:
+                    return found
+            except (json.JSONDecodeError, OSError) as e:
+                print(f"[unsplash] {deploy_json} parse error: {e}; skipping", file=sys.stderr)
+                break
+    return None
+
+
+def _try_unsplash(query: str, out_dir: Path) -> Optional[dict]:
+    key = _resolve_unsplash_key()
     if not key:
         return None
     params = urllib.parse.urlencode({
