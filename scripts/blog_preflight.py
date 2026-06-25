@@ -497,8 +497,18 @@ def _http_head(url: str) -> int:
 
 
 def _is_allowed_unreachable(url: str) -> bool:
+    """True only when the effective host exactly matches an allowlist entry.
+
+    FIND-03: the previous ``part in parsed.netloc`` substring check treated
+    ``example.com.evil.com`` as allowlisted, skipping the Gate 5 HEAD check.
+    We now compare the parsed hostname (lowercased, port-stripped via
+    ``urlparse.hostname``) for exact equality with an allowlist entry.
+    """
     parsed = urllib.parse.urlparse(url)
-    return any(part in parsed.netloc for part in URL_ALLOWLIST)
+    host = (parsed.hostname or "").lower()
+    if not host:
+        return False
+    return host in URL_ALLOWLIST
 
 
 def gate_5_asset_link_integrity(draft_dir: Path) -> dict:
