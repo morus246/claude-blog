@@ -12,7 +12,7 @@ This contract is the v1.9.0 answer to a failure pattern from the v1.8.x cycle: s
 | 2. Format Completeness | `.md` + `.html` + `.pdf` + `hero.png` all present | Block on any missing artifact | `scripts/blog_render.py` produces all three |
 | 3. Visual Verification | Rendered HTML has no SVG overflow, no console errors, valid JSON-LD | Block on any defect; preserve screenshots | `scripts/blog_preflight.py --gate 3` via `patchright` |
 | 4. Content Review | `blog-reviewer` scores ≥ 90/100 AND has zero unresolved P0/P1 issues | Block + iterate | `agents/blog-reviewer.md` + independent checks in `blog_preflight.py` |
-| 5. Asset + Link Integrity | Every `<img>` resolves, every `<a>` returns 200, schema validates | Block on any 404 or count mismatch | `scripts/blog_preflight.py --gate 5` |
+| 5. Asset Existence + Link Integrity | Every `<img>` resolves, every `<a>` returns 200, schema validates | Block on any 404 or count mismatch | `scripts/blog_preflight.py --gate 5` |
 
 All gates run sequentially. First failure halts the chain and triggers the iteration loop. Successful drafts ship with `preflight-report.json` + `review.md` + `preview/*.png` in the draft folder.
 
