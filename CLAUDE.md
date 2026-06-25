@@ -94,7 +94,7 @@ claude-blog/
     blog-seo.md                     # SEO validation
     blog-reviewer.md                # Quality scoring (no Bash, post v1.7.0 hardening)
     blog-translator.md              # Multilingual translation (no Bash, v1.7.0)
-  tests/                             # pytest suite (284 tests) incl. test_blog_delivery_contract.py + test_security_guardrails.py
+  tests/                             # pytest suite (286 tests) incl. test_blog_delivery_contract.py + test_security_guardrails.py
 ```
 
 ## Commands
