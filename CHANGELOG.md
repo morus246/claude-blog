@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Image generation: nanobanana-mcp setup documented, ladder contract pinned
+
+Wired up the `nanobanana-mcp` tier of the Blog Delivery Contract hero-image ladder so `/blog image`, `blog-write`, and `blog-rewrite` can produce AI-generated heroes end-to-end. Pinned the ladder's documented 4-step fallback order (`mmx` -> `unsplash` -> `openverse` -> fail) with a regression test so the no-key Openverse path stays intact.
+
+**Added**
+
+- `tests/test_generate_hero_ladder.py`: 3 cases asserting the ladder order in `scripts/generate_hero.py` docstring, the `OPENVERSE_API` constant, and the OG-card default dimensions (1200x630).
+- README badge + CLAUDE.md test-count comment updated from 258 to 261 (added 3 cases).
+
+**Changed**
+
+- Documented end-user setup path: `python3 skills/blog-image/scripts/setup_image_mcp.py --key <KEY>` writes `~/.claude/settings.json` (mode 0600) and `python3 skills/blog-image/scripts/validate_image_setup.py` is the readiness gate. Project mode (`.mcp.json`) refuses to write a literal key into a tracked file.
+
 ### Tests: deploy frontmatter kwargs aligned + prose lint pass
 
 Fixed a one-token test signature drift in `tests/test_deploy_post.py` that broke 20 pre-existing tests across `TestNormalizePTFrontmatter` and `TestNormalizeENFrontmatter`. Replaced 5 em-dashes flagged by `scripts/lint_prose.py` per the `CONTRIBUTING.md` rule. No production code changed.
