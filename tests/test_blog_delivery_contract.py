@@ -498,5 +498,18 @@ def test_render_wordcount_matches_gate5_semantics(tmp_path: Path) -> None:
     )
 
 
+def test_no_strict_warning_fires_under_json(tmp_path: Path) -> None:
+    """FIND-10: the 'bypassed via --no-strict' warning must reach stderr even
+    when --json is set, not only in the human-readable branch."""
+    (tmp_path / "post.md").write_text(_VALID_FRONTMATTER + "body\n", encoding="utf-8")
+    # No .html -> Gate 2 (and others) fail -> blocked True.
+    result = subprocess.run(
+        [sys.executable, str(PREFLIGHT_PATH), "--draft", str(tmp_path),
+         "--gate", "2", "--no-strict", "--json"],
+        capture_output=True, text=True, check=False,
+    )
+    assert "bypassed via --no-strict" in result.stderr
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

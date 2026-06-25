@@ -851,8 +851,12 @@ def main() -> int:
                 print(f"       violation: {v}")
             for w in r.get("warnings", []):
                 print(f"       warning:   {w}")
-        if blocked and not args.strict:
-            print("WARNING: contract bypassed via --no-strict; do not publish without manual review.", file=sys.stderr)
+
+    # FIND-10: the loud bypass warning must fire under --json too, not only
+    # in the human-readable branch. The JSON body carries blocked/strict, but
+    # the docstring promises a loud stderr log on bypass.
+    if blocked and not args.strict:
+        print("WARNING: contract bypassed via --no-strict; do not publish without manual review.", file=sys.stderr)
 
     if blocked and args.strict:
         return 1
