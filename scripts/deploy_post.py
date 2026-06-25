@@ -271,7 +271,7 @@ def main() -> int:
             en_md = en_files[0]
         elif len(en_files) > 1:
             print(
-                f"[deploy] WARNING: {len(en_files)} files in translations/en/ and none matches slug '{slug}' — skipping EN deploy.",
+                f"[deploy] WARNING: {len(en_files)} files in translations/en/ and none matches slug '{slug}' - skipping EN deploy.",
                 file=sys.stderr,
             )
     en_slug = en_md.stem if en_md else None
@@ -297,7 +297,7 @@ def main() -> int:
     build = subprocess.run(["pnpm", "run", "build"], cwd=str(site), capture_output=True, text=True)
     if build.returncode != 0:
         _rollback(written)
-        _fail("pnpm build failed — rolled back written files.", {"stderr": build.stderr[-2000:]})
+        _fail("pnpm build failed - rolled back written files.", {"stderr": build.stderr[-2000:]})
 
     # Step 11: deploy.sh
     if not args.dry_run:
@@ -312,7 +312,7 @@ def main() -> int:
             errors="replace",
         )
         if deploy.returncode != 0:
-            _fail("deploy.sh failed. Files remain in fabiomorus repo — revert manually if needed.",
+            _fail("deploy.sh failed. Files remain in fabiomorus repo - revert manually if needed.",
                   {"stderr": deploy.stderr[-2000:]})
 
     # Step 12: success

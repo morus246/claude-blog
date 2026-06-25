@@ -79,7 +79,7 @@ class TestNormalizePTFrontmatter:
 
     def _run(self, deploy_module, fm, en_slug=None, category=None):
         return deploy_module._normalize_pt_frontmatter(
-            fm, slug=self.SLUG, en_slug=en_slug, category=category, hero_rel=self.HERO
+            fm, slug=self.SLUG, en_slug=en_slug, category=category, hero_url=self.HERO
         )
 
     def test_coverImage_renamed_and_overridden(self, deploy_module):
@@ -149,7 +149,7 @@ class TestNormalizeENFrontmatter:
 
     def _run(self, deploy_module, fm, category=None):
         return deploy_module._normalize_en_frontmatter(
-            fm, slug="meu-post", en_slug="my-post", category=category, hero_rel=self.HERO
+            fm, slug="meu-post", en_slug="my-post", category=category, hero_url=self.HERO
         )
 
     def test_lang_set_to_en(self, deploy_module):
@@ -447,7 +447,7 @@ class TestENDetection:
         )
         (draft / "hero.jpg").write_bytes(b"\xff\xd8\xff\xe0" + b"x" * 100)
 
-        # Two EN files — one matches the PT slug (meu-post), one doesn't
+        # Two EN files - one matches the PT slug (meu-post), one doesn't
         en_dir = tmp_path / "translations" / "en"
         en_dir.mkdir(parents=True)
         (en_dir / "meu-post.md").write_text(
